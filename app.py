@@ -7,6 +7,7 @@ import requests
 import plotly.graph_objs as go
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
 from dash import dcc
 from dash import html
 import dash_daq
@@ -708,6 +709,57 @@ def cluster_data(n_clusters, data, features):
     data['inertia'] = inertia
     data['silhouette'] = silhouette
     data['features'] = '; '.join(features)
+    data['pca'] = False
+        
+    color_df = colors.sample(len(colors)).copy()
+    color_df.index = np.arange(len(colors))+1
+    
+    color_df = color_df.iloc[:len(pd.unique(data.cluster))]
+    
+    
+    
+    data = pd.merge(left=data.reset_index(),right=color_df, left_on='cluster', right_on=color_df.index).drop('Unnamed: 0',axis=1)
+    
+    
+    
+    data = data.sort_values(by='cluster')
+    
+    data.cluster = data.cluster.astype(str)
+    
+    data = data.set_index('Alue')
+    
+
+    return data
+
+
+def cluster_data_with_PCA(n_clusters, data, features):
+    
+    scl = StandardScaler()  
+
+    x = data[features]
+
+    X = scl.fit_transform(x)
+    
+    pca = PCA(n_components = len(features))
+
+    principalComponents = pca.fit_transform(X)
+    
+    PCA_components = pd.DataFrame(principalComponents)
+
+    kmeans = KMeans(n_clusters, random_state = 42)
+        
+    preds = kmeans.fit_predict(PCA_components.iloc[:,:2])
+
+    clusters = preds + 1 
+    
+    inertia = round(kmeans.inertia_,1)
+    silhouette = round(silhouette_score(x, preds),1)
+
+    data['cluster'] = clusters
+    data['inertia'] = inertia
+    data['silhouette'] = silhouette
+    data['features'] = '; '.join(features)
+    data['pca'] = True
         
     color_df = colors.sample(len(colors)).copy()
     color_df.index = np.arange(len(colors))+1
@@ -1079,10 +1131,15 @@ def serve_layout():
                        html.Br(),
                    ],xs =10, sm=8, md=5, lg=6, xl=6)
                 ]),
+        
         # 4. rivi
+        dbc.Row([dash_daq.BooleanSwitch(id = 'pca_switch', 
+                                         label = dict(label = 'Käytä pääkomponenttianalyysia',style = {'font-size':20, 'fontFamily':'Arial Black'}), 
+                                          on = False, 
+                                          color = 'blue')],
+               justify='center',align="start"),
+        html.Div([html.Br()]),
         dbc.Row([
-                       html.Br(),
-
                        dbc.Button('Klusteroi',
                                   id='cluster_button',
                                   n_clicks=0,
@@ -1154,10 +1211,15 @@ def serve_layout():
                                html.Br(),
                                html.H4('Ohje',style={'textAlign':'center'}),
                                html.Br(),
-                               html.P('1. Valitse valikosta halutut avainluvut klusterointimuuttujiksi.', style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
+                               html.P('1. Valitse valikosta halutut avainluvut klusterointimuuttujiksi. Voit myös valita kaikki valikon alla olevasta painikkeesta.', style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
                                html.P('2. Valitse haluttu aluetaso aluepainikkeista.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
                                html.P('3. Valitse klustereiden määrä vierittämällä valintapalkkia.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
-                               html.P('4. Klusteroi klikkaamalla "Klusteroi" -painiketta.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
+                               html.P('4. Valitse kytkimellä käytetäänkö pääkomponenttianalyysiä. Asiaa on selitetty alla olevalla tekstillä.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
+                               html.P('5. Klusteroi klikkaamalla "Klusteroi" -painiketta.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
+                               html.Br(),
+                               html.H4('Pääkomponenttianalyysista',style={'textAlign':'center'}),
+                               html.Br(),
+                               html.P('Pääkomponenttianalyysi (englanniksi Principal Component Analysis, PCA) on dimension redusointitekniikka. Sen tavoitteena on löytää monidimensioisesta datasta ne komponentit, joiden avulla sen keskeisimmät piirteet voidaan esittää ilman, että merkittävää informaatiota menee hukkaan. Tässä sovelluksessa PCA paketoi käytetyt avainluvut kahteen pääkomponenttiin. Tämä on käytännöllinen toimenpide erityisesti silloin, kun klusterointia tehdään perustuen moneen avainlukuun. PCA:lla voi siten poistaa niitä muuttujia, jotka aiheuttavat datassa kohinaa. PCA:n haittapuoli on kuitenkin se, että pääkomponentteja ei pysty palauttamaan takaisin alkuperäisiin muuttujiin, jolloin menetetään tarkka tieto siitä mitä muuttujia klusteroinnissa lopulta hyödynnettiin.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
                                html.Br(),
                                html.H4('Klusterit ja sijainnit',style={'textAlign':'center'}),
                                html.Br(),
@@ -1184,11 +1246,15 @@ def serve_layout():
                                            ],style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
                                    html.Br(),
                                    html.Label(['Wikipedia: ', 
-                                            html.A('käytetyt värit', href = "https://en.wikipedia.org/wiki/Lists_of_colors",target="_blank")
+                                            html.A('K-Means -klusterointi', href = "https://en.wikipedia.org/wiki/K-means_clustering",target="_blank")
                                            ],style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
                                    html.Br(),
                                    html.Label(['Wikipedia: ', 
-                                            html.A('K-Means -klusterointi', href = "https://en.wikipedia.org/wiki/K-means_clustering",target="_blank")
+                                            html.A('Pääkomponenttianalyysi', href = "https://fi.wikipedia.org/wiki/P%C3%A4%C3%A4komponenttianalyysi",target="_blank")
+                                           ],style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                                   html.Br(),
+                                   html.Label(['Wikipedia: ', 
+                                            html.A('käytetyt värit', href = "https://en.wikipedia.org/wiki/Lists_of_colors",target="_blank")
                                            ],style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
                                    html.Br(),
                                    html.Label(['Codeacademy: ', 
@@ -1212,7 +1278,7 @@ def serve_layout():
                                    html.Br(),
                                    html.Br(),
                                    html.Label(['Sovellus ', 
-                                            html.A('GitHub:ssa', href='https://github.com/tuopouk/vaestometsa/tree/master')
+                                            html.A('GitHub:ssa', href='https://github.com/tuopouk/suomenavainklusterit')
                                            ],style={'textAlign':'center','font-family':'Arial', 'font-size':20})
                                ])
                           ])
@@ -1285,15 +1351,20 @@ def update_buttons(n_clicks):
     [Input('cluster_button','n_clicks'),
      State('area', 'value'),
     State('n_clusters', 'value'),
-    State('features','value')]
+    State('features','value'),
+    State('pca_switch','on')]
 )
-def perform_clustering(n_clicks,area, n_clusters, features):
+def perform_clustering(n_clicks,area, n_clusters, features, pca):
     
     if n_clicks > 0:
         
         data = data_dict[area]
         
-        data = cluster_data(n_clusters, data, features)
+        
+        data = {True: cluster_data_with_PCA(n_clusters, data, features),
+                False: cluster_data(n_clusters, data, features)
+               }[pca]
+        #data = cluster_data(n_clusters, data, features)
         
         koko_maa = koko_maa_dict[area]
         
@@ -1605,16 +1676,20 @@ def download(n_clicks, dataset):
         silhouette = data.silhouette.values[0]
         aluejako = data.Aluejako.values[0]
         features = data.features.values[0].split(';')
-        features = '\n'.join([str(count+1)+': '+value.strip() for count, value in enumerate(features)])
+        features = '\n'.join([str(count+1)+': '+value.strip()+' ' for count, value in enumerate(features)])
         n_clusters = len(pd.unique(data.cluster))
-        data.drop(['color','Aluejako','silhouette','inertia','features'],axis=1,inplace=True)
+        pca = data.pca.values[0]
+        data.drop(['color','Aluejako','silhouette','inertia','features','pca'],axis=1,inplace=True)
         data.columns = data.columns.str.replace('cluster','Klusteri')
         
         metadata = pd.DataFrame([{'Aluejako':aluejako,
                                   'Klusterit':n_clusters,
+                                  'Pääkomponenttianlyysi':{True:'Kyllä',False:'Ei'}[pca],
                                  'Klusteroinnin avainluvut':features,
-                                 'Silohouette':silhouette,
-                                 'Inertia':inertia}]).set_index('Aluejako')
+                                 'Siluetti':silhouette,
+                                 'Inertia':inertia}]).T.reset_index()
+        metadata.columns = ['Tieto','Arvo']
+        metadata = metadata.set_index('Tieto')
         
         
         xlsx_io = io.BytesIO()
