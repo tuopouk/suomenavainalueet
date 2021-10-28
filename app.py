@@ -1063,15 +1063,15 @@ def serve_layout():
                        html.H3('Valitse klustereiden määrä.',style={'textAlign':'center'}),
                        dcc.Slider(id = 'n_clusters',
                                  min = 2,
-                                 max = 15,
+                                 max = 10,
                                  value = initial_n_clusters,
                                  step = 1,
                                  marks = {2: {'label':'2', 'style':{'font-size':20, 'fontFamily':'Arial Black'}},
                                           5:{'label':'5', 'style':{'font-size':20, 'fontFamily':'Arial Black'}},
                                           7:{'label':'7', 'style':{'font-size':20, 'fontFamily':'Arial Black'}},
-                                          10:{'label':'10', 'style':{'font-size':20, 'fontFamily':'Arial Black'}},
-                                          12:{'label':'12', 'style':{'font-size':20, 'fontFamily':'Arial Black'}},
-                                          15:{'label':'15', 'style':{'font-size':20, 'fontFamily':'Arial Black'}}
+                                          10:{'label':'10', 'style':{'font-size':20, 'fontFamily':'Arial Black'}}
+                                         # 12:{'label':'12', 'style':{'font-size':20, 'fontFamily':'Arial Black'}},
+                                         # 15:{'label':'15', 'style':{'font-size':20, 'fontFamily':'Arial Black'}}
                                           }
                                  ),
                        html.Br(),
