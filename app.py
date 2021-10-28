@@ -616,7 +616,12 @@ spinners = ['graph', 'cube', 'circle', 'dot' ,'default']
 
 server = Flask(__name__)
 server.secret_key = os.environ.get('secret_key','secret')
-app = Dash(name = __name__, prevent_initial_callbacks = True, server = server,external_stylesheets=[dbc.themes.JOURNAL,"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"])
+app = Dash(name = __name__, 
+           prevent_initial_callbacks = True, 
+           server = server,
+           meta_tags = [{'name':'viewport',
+                        'content':'width=device-width, initial_scale=1.0, maximum_scale=1.2, minimum_scale=0.5'}],
+           external_stylesheets=[dbc.themes.JOURNAL,"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"])
 
 
 app.title = 'Suomen avainklusterit'
@@ -1010,15 +1015,15 @@ def serve_layout():
     return html.Div(children = [
         
               
-               dbc.Row(dbc.Col(html.H1('Suomen avainklusterit',style={'textAlign':'center'}),width={'size': 6, 'offset': 3})),
+               html.H1('Suomen avainklusterit',style={'textAlign':'center'}),
                html.Br(),
               
-               dbc.Row(dbc.Col(html.H3('klusterointityökalu',style={'textAlign':'center'}),width={'size': 6, 'offset': 3})),
+               html.H3('klusterointityökalu',style={'textAlign':'center'}),
                 html.Br(),
               
                 dbc.Row(children = [
                     
-                    dbc.Col(width={'size': 7, "offset": 0}, children=[
+                    dbc.Col(children=[
                        html.H3('Valitse klusterointimuuttujat.',style={'textAlign':'center'}),
                        html.Br(),
                        dcc.Dropdown(id = 'features', 
@@ -1033,11 +1038,11 @@ def serve_layout():
                                               on = False, 
                                               color = 'blue') 
 
-                    ]),
+                    ],xs =10, sm=8, md=5, lg=6, xl=6),
                 
                   
                    
-                   dbc.Col(width={'size': 5, "offset": 0},align='center', children=[
+                   dbc.Col(children=[
                        html.H3('Valitse aluetaso',style={'textAlign':'center'}),
                        html.Br(),
 
@@ -1072,10 +1077,10 @@ def serve_layout():
                        html.Br(),
                        html.Div(id = 'slider_update', children = [html.P('Valitsit {} klusteria.'.format(initial_n_clusters),style = {'textAlign':'center', 'fontSize':18, 'fontFamily':'Arial Black'})]),
                        html.Br(),
-                   ])
+                   ],xs =10, sm=8, md=5, lg=6, xl=6)
                 ]),
         # 4. rivi
-        dbc.Row([dbc.Col(width=dict(size = 12, offset = 6),style={'margin-left':'48%'},children=[
+        dbc.Row([
                        html.Br(),
 
                        dbc.Button('Klusteroi',
@@ -1091,27 +1096,27 @@ def serve_layout():
                     html.Br()
                     
                      
-                    ])]),
+                    ],justify='center'),
         
         html.Br(),
         
         dbc.Tabs(children= [
             
             dbc.Tab(label = 'Klusterit ja sijainnit',
-                    tabClassName="ms-auto",
-                    tab_style = {'margin-left':'20%','font-size':28}, 
+                    tabClassName="flex-grow-1 text-center",
+                    tab_style = {'font-size':28}, 
                     children = [
 
                 
                 html.Br(),
-                html.Div(id = 'other_buttons'),
+                dbc.Row(id = 'other_buttons',justify='end'),
                 html.Br(),
                 dbc.Row( id = 'count_and_map')
                 
             ]),
             
             dbc.Tab(label = 'Avainluvut klustereittain',
-                    tabClassName="ms-auto",
+                    tabClassName="flex-grow-1 text-center",
                     tab_style = {'font-size':28},
                     children = [
 
@@ -1121,7 +1126,7 @@ def serve_layout():
                 
             ]),
             dbc.Tab(label = 'Klustereiden tarkastelu kahden avainluvun mukaan',
-                    tabClassName="ms-auto",
+                    tabClassName="flex-grow-1 text-center",
                     tab_style = {'font-size':28},
                     children = [
 
@@ -1132,76 +1137,89 @@ def serve_layout():
                 
             ]),
             dbc.Tab(label = 'Ohje ja esittely',
-                   tabClassName="ms-auto",
+                   tabClassName="flex-grow-1 text-center",
                     tab_style = {'font-size':28},
                    children = [
-                       html.Br(),
-                       html.P('Avainluvuista avainklustereihin', style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
-                       html.Br(),
-                       html.H4('Johdanto',style={'textAlign':'center'}),
-                       html.Br(),
-                       html.P('Tässä sovelluksessa voi jakaa Suomen kunnat, seutukunnat tai maakunnat avainklustereihin itse valittujen kuntien avainlukujen mukaan. Kuntien avainluvut ovat Tilastokeskuksen ylläpitämä data-aineisto, joka sisältää alueita koskevia tunnuslukuja. Tämä sovellus pyrkiikin täydentämään Kuntien avainluvut -palvelua mahdollistamalla kuntien, seutukuntien tai maakuntien ryhmittelyn käyttäjän tarpeen mukaisilla indikaattoreilla. Käyttäjä voi valita avainlukujen ja aluetason lisäksi myös haluttujen klustereiden määrän. Klustereiden määrän valintaan ei ole oikeaa tai väärää vastausta. Haluttua määrää lieneekin hyvä tarkastella käyttäjän substanssin kautta. Jos on esimerkiksi tarkoitus perustaa tietty määrä aluekehitystyöryhmiä, on mahdollista valita klustereita tuo samainen määrä. Käyttäjä voi myös kokeilla eri lähtöarvoja klustereiden muodostamiseksi. Klusterointi perustuu tässä sovelluksessa ohjaamattomaan koneoppimiseen perustuvaan K-Means -klusterointiin, missä K on valittujen klustereiden määrä. Sivun alalaidasta löytyy linkki Wikipedia-artikkeliin K-Means -klusteroinnista.',style={'textAlign':'center','font-family':'Arial', 'font-size':20, 'margin-left':'20%', 'margin-right':'20%'}),
-                       html.Br(),
-                       html.H4('Ohje',style={'textAlign':'center'}),
-                       html.Br(),
-                       html.P('1. Valitse valikosta halutut avainluvut klusterointimuuttujiksi.', style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
-                       html.P('2. Valitse haluttu aluetaso aluepainikkeista.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
-                       html.P('3. Valitse klustereiden määrä vierittämällä valintapalkkia.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
-                       html.P('4. Klusteroi klikkaamalla "Klusteroi" -painiketta.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
-                       html.Br(),
-                       html.H4('Klusterit ja sijainnit',style={'textAlign':'center'}),
-                       html.Br(),
-                       html.P('Klusterit ja sijainnit -välilehdellä käyttäjä voi tarkastella klustereiden kokoja (eli niiden sisältämien alueiden määrää) sekä niiden alueellista jakautumista. Tämä auttaa myös klustereiden määrän määrittelyssä, mikäli halutaan mahdollisimman tasaisesti jakautuneita klustereita. Pylväskuvion alle ilmestyy myös klusteroinnin inertia -ja siluettipisteet. Ne ovat indikaattoreita, jotka kuvaavat klustereiden jakautumista. Parhaassa tapauksessa klusterit sisältävät samanlaisia jäseniä, ja klusterit ovat kaukana toisistaan. Inertia kuvaa vain edellistä, kun taas siluetti kuvaa kokonaisuutta. Inertialle ei ole viitearvoa, mutta pienemmät arvot kertovat paremmasta klusterin sisäisestä jaosta. Siluetti saa arvoja -1 ja 1 väliltä. Teoriassa lähempänä ykköstä oleva siluettiarvo kuvaa hyvää klusterijakoa ja lähellä nollaa olevat arvot indikoivat samanlaisia klustereita. Käytännössä kuitenkin saavutettavat arvot riippuvat alkuperäisestä aineistosta, eikä ole viitearvoja siitä mikä on paras mahdollinen siluettiarvo, joka voidaan muodostaa ko. aineisto klusteroimalla. Tämänkin indikaattorin muutosta käyttäjä voi tarkastella klusterointiasetuksia muuttamalla.',style = {'textAlign':'center','font-family':'Arial', 'font-size':20, 'margin-left':'20%', 'margin-right':'20%'}),
-                       html.P('Klikkaamalla "Lataa karttanäkymä" -painiketta, voi klustereiden maantieteellistä jakautumista tarkastella kartalla. Lisäksi klusteroinnin tulokset voi viedä Excel-tiedostoon klikkaamalla "Lataa tiedosto koneelle" -nappia. Tiedostoon tulostuu kuntien avainluvut klustereittain sekä klusteroinnin metatiedot (valitut muuttujat, klustereiden määrä, aluetasosekä laatuindikaattorit).',style={'textAlign':'center','font-family':'Arial', 'font-size':20, 'margin-left':'20%', 'margin-right':'20%'}),
-                       html.Br(),
-                       html.H4('Avainluvut klustereittain', style = {'text-align':'center'}),
-                       html.Br(),
-                       html.P('Avainluvut klustereittain -lehdellä voi tarkastella klustereiden eroja valittujen avainlukujen suhteen. Pylväskuvioiden avulla pystyy havainnoimaan avinlukujen klusterikohtaisia keskiarvoja sekä miten ne suhtautuvat koko maan viitearvoon. Koko maan arvo on suhteellisissa luvuissa (esim. työllisyysaste) Tilastokeskuksen ilmoittama viitearvo, ja määrällisissä luvuissa (esim. väkiluku) alueiden keskiarvo. Pylväitä voi tarkastella sekä klusteroinnissa käytettyjen avainlukujen että klusteroinnin ulkopuolisten avainlukujen mukaan.',style={'textAlign':'center','font-family':'Arial', 'font-size':20, 'margin-left':'20%', 'margin-right':'20%'}),
-                       html.Br(),
-                       html.H4('Klustereiden tarkastelu kahden avainluvun mukaan.',style={'textAlign':'center'}),
-                       html.Br(),
-                       html.P('Klustereita voi tarkastella myös kahden avainluvun mukaan sille varatulla välilehdellä. Näin pystyy tarkastelemaan avainlukujen välisiä korrelaatioita klustereittain sekä profiloimaan klustereita paremmin.',style={'textAlign':'center','font-family':'Arial', 'font-size':20, 'margin-left':'20%', 'margin-right':'20%'}),
-                       html.Br(),
-                       html.H4('Lähteet', style = {'text-align':'center'}),
-                       html.Br(),
-                       html.Label(['Tilastokeskus: ', 
-                                html.A('Kuntien avainluvut', href = "https://www.stat.fi/tup/alue/kuntienavainluvut.html#?year=2021&active1=SSS",target="_blank")
-                               ],style={'textAlign':'center','font-family':'Arial', 'font-size':20, 'margin-left':'40%', 'margin-right':'20%'}),
-                       html.Br(),
-                       html.Label(['Tilastokeskus: ', 
-                                html.A('Paikkatietoaineistot', href = "https://www.tilastokeskus.fi/org/avoindata/paikkatietoaineistot.html",target="_blank")
-                               ],style={'textAlign':'center','font-family':'Arial', 'font-size':20, 'margin-left':'40%', 'margin-right':'20%'}),
-                       html.Br(),
-                       html.Label(['Wikipedia: ', 
-                                html.A('käytetyt värit', href = "https://en.wikipedia.org/wiki/Lists_of_colors",target="_blank")
-                               ],style={'textAlign':'center','font-family':'Arial', 'font-size':20, 'margin-left':'40%', 'margin-right':'20%'}),
-                       html.Br(),
-                       html.Label(['Wikipedia: ', 
-                                html.A('K-Means -klusterointi', href = "https://en.wikipedia.org/wiki/K-means_clustering",target="_blank")
-                               ],style={'textAlign':'center','font-family':'Arial', 'font-size':20, 'margin-left':'40%', 'margin-right':'20%'}),
-                       html.Br(),
-                       html.Label(['Codeacademy: ', 
-                                html.A('Inertia klusteroinnissa (englanniksi)', href = "https://www.codecademy.com/learn/machine-learning/modules/dspath-clustering/cheatsheet",target="_blank")
-                               ],style={'textAlign':'center','font-family':'Arial', 'font-size':20, 'margin-left':'40%', 'margin-right':'20%'}),
-                       html.Br(),
-                       html.Label(['Towards Data Science: ', 
-                                html.A('Siluetti -pisteytyksen esittely (englanniksi)', href = "https://towardsdatascience.com/silhouette-coefficient-validating-clustering-techniques-e976bb81d10c",target="_blank")
-                               ],style={'textAlign':'center','font-family':'Arial', 'font-size':20, 'margin-left':'40%', 'margin-right':'20%'}),
-                       html.Br(),
-                       html.Br(),
-                       html.H4('Tekijä', style = {'text-align':'center'}),
-                       html.Br(),
-                       html.I('Tuomas Poukkula', style = {'textAlign':'center','font-family':'Arial', 'font-size':20, 'margin-left':'45%', 'margin-right':'20%'}),
-                       html.Br(),
-                       html.A('Seuraa LinkedIn:ssä', href='https://www.linkedin.com/in/tuomaspoukkula/', target = '_blank',style = {'textAlign':'center','font-family':'Arial', 'font-size':20, 'margin-left':'40%', 'margin-right':'20%'}),
-                       html.Br(),
-                       html.A('tai Twitterissä.', href='https://twitter.com/TuomasPoukkula', target = '_blank',style = {'textAlign':'center','font-family':'Arial', 'font-size':20, 'margin-left':'40%', 'margin-right':'20%'}),
-                       html.Br(),
-                       html.Br(),
-                       html.Label(['Sovellus ', 
-                                html.A('GitHub:ssa', href='https://github.com/tuopouk/vaestometsa/tree/master')
-                               ],style={'textAlign':'center','font-family':'Arial', 'font-size':20, 'margin-left':'40%', 'margin-right':'20%'})
                        
+                      dbc.Row(justify='center', children=[
+                          
+                          dbc.Col(xs =10, sm=8, md=5, lg=6, xl=6, children =[
+                       
+                               html.Br(),
+                               html.P('Avainluvuista avainklustereihin', style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                               html.Br(),
+                               html.H4('Johdanto',style={'textAlign':'center'}),
+                               html.Br(),
+                               html.P('Tässä sovelluksessa voi jakaa Suomen kunnat, seutukunnat tai maakunnat avainklustereihin itse valittujen kuntien avainlukujen mukaan. Kuntien avainluvut ovat Tilastokeskuksen ylläpitämä data-aineisto, joka sisältää alueita koskevia tunnuslukuja. Tämä sovellus pyrkiikin täydentämään Kuntien avainluvut -palvelua mahdollistamalla kuntien, seutukuntien tai maakuntien ryhmittelyn käyttäjän tarpeen mukaisilla indikaattoreilla. Käyttäjä voi valita avainlukujen ja aluetason lisäksi myös haluttujen klustereiden määrän. Klustereiden määrän valintaan ei ole oikeaa tai väärää vastausta. Haluttua määrää lieneekin hyvä tarkastella käyttäjän substanssin kautta. Jos on esimerkiksi tarkoitus perustaa tietty määrä aluekehitystyöryhmiä, on mahdollista valita klustereita tuo samainen määrä. Käyttäjä voi myös kokeilla eri lähtöarvoja klustereiden muodostamiseksi. Klusterointi perustuu tässä sovelluksessa ohjaamattomaan koneoppimiseen perustuvaan K-Means -klusterointiin, missä K on valittujen klustereiden määrä. Sivun alalaidasta löytyy linkki Wikipedia-artikkeliin K-Means -klusteroinnista.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                               html.Br(),
+                               html.H4('Ohje',style={'textAlign':'center'}),
+                               html.Br(),
+                               html.P('1. Valitse valikosta halutut avainluvut klusterointimuuttujiksi.', style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
+                               html.P('2. Valitse haluttu aluetaso aluepainikkeista.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
+                               html.P('3. Valitse klustereiden määrä vierittämällä valintapalkkia.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
+                               html.P('4. Klusteroi klikkaamalla "Klusteroi" -painiketta.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
+                               html.Br(),
+                               html.H4('Klusterit ja sijainnit',style={'textAlign':'center'}),
+                               html.Br(),
+                               html.P('Klusterit ja sijainnit -välilehdellä käyttäjä voi tarkastella klustereiden kokoja (eli niiden sisältämien alueiden määrää) sekä niiden alueellista jakautumista. Tämä auttaa myös klustereiden määrän määrittelyssä, mikäli halutaan mahdollisimman tasaisesti jakautuneita klustereita. Pylväskuvion alle ilmestyy myös klusteroinnin inertia -ja siluettipisteet. Ne ovat indikaattoreita, jotka kuvaavat klustereiden jakautumista. Parhaassa tapauksessa klusterit sisältävät samanlaisia jäseniä, ja klusterit ovat kaukana toisistaan. Inertia kuvaa vain edellistä, kun taas siluetti kuvaa kokonaisuutta. Inertialle ei ole viitearvoa, mutta pienemmät arvot kertovat paremmasta klusterin sisäisestä jaosta. Siluetti saa arvoja -1 ja 1 väliltä. Teoriassa lähempänä ykköstä oleva siluettiarvo kuvaa hyvää klusterijakoa ja lähellä nollaa olevat arvot indikoivat samanlaisia klustereita. Käytännössä kuitenkin saavutettavat arvot riippuvat alkuperäisestä aineistosta, eikä ole viitearvoja siitä mikä on paras mahdollinen siluettiarvo, joka voidaan muodostaa ko. aineisto klusteroimalla. Tämänkin indikaattorin muutosta käyttäjä voi tarkastella klusterointiasetuksia muuttamalla.',style = {'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                               html.P('Klikkaamalla "Lataa karttanäkymä" -painiketta, voi klustereiden maantieteellistä jakautumista tarkastella kartalla. Lisäksi klusteroinnin tulokset voi viedä Excel-tiedostoon klikkaamalla "Lataa tiedosto koneelle" -nappia. Tiedostoon tulostuu kuntien avainluvut klustereittain sekä klusteroinnin metatiedot (valitut muuttujat, klustereiden määrä, aluetasosekä laatuindikaattorit).',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                               html.Br(),
+                               html.H4('Avainluvut klustereittain', style = {'text-align':'center'}),
+                               html.Br(),
+                               html.P('Avainluvut klustereittain -lehdellä voi tarkastella klustereiden eroja valittujen avainlukujen suhteen. Pylväskuvioiden avulla pystyy havainnoimaan avinlukujen klusterikohtaisia keskiarvoja sekä miten ne suhtautuvat koko maan viitearvoon. Koko maan arvo on suhteellisissa luvuissa (esim. työllisyysaste) Tilastokeskuksen ilmoittama viitearvo, ja määrällisissä luvuissa (esim. väkiluku) alueiden keskiarvo. Pylväitä voi tarkastella sekä klusteroinnissa käytettyjen avainlukujen että klusteroinnin ulkopuolisten avainlukujen mukaan.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                               html.Br(),
+                               html.H4('Klustereiden tarkastelu kahden avainluvun mukaan.',style={'textAlign':'center'}),
+                               html.Br(),
+                               html.P('Klustereita voi tarkastella myös kahden avainluvun mukaan sille varatulla välilehdellä. Näin pystyy tarkastelemaan avainlukujen välisiä korrelaatioita klustereittain sekä profiloimaan klustereita paremmin.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                               html.Br(),
+                               html.Div(style={'text-align':'center'},children = [
+                                   html.H4('Lähteet', style = {'text-align':'center'}),
+                                   html.Br(),
+                                   html.Label(['Tilastokeskus: ', 
+                                            html.A('Kuntien avainluvut', href = "https://www.stat.fi/tup/alue/kuntienavainluvut.html#?year=2021&active1=SSS",target="_blank")
+                                           ],style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                                   html.Br(),
+                                   html.Label(['Tilastokeskus: ', 
+                                            html.A('Paikkatietoaineistot', href = "https://www.tilastokeskus.fi/org/avoindata/paikkatietoaineistot.html",target="_blank")
+                                           ],style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                                   html.Br(),
+                                   html.Label(['Wikipedia: ', 
+                                            html.A('käytetyt värit', href = "https://en.wikipedia.org/wiki/Lists_of_colors",target="_blank")
+                                           ],style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                                   html.Br(),
+                                   html.Label(['Wikipedia: ', 
+                                            html.A('K-Means -klusterointi', href = "https://en.wikipedia.org/wiki/K-means_clustering",target="_blank")
+                                           ],style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                                   html.Br(),
+                                   html.Label(['Codeacademy: ', 
+                                            html.A('Inertia klusteroinnissa (englanniksi)', href = "https://www.codecademy.com/learn/machine-learning/modules/dspath-clustering/cheatsheet",target="_blank")
+                                           ],style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                                   html.Br(),
+                                   html.Label(['Towards Data Science: ', 
+                                            html.A('Siluetti -pisteytyksen esittely (englanniksi)', href = "https://towardsdatascience.com/silhouette-coefficient-validating-clustering-techniques-e976bb81d10c",target="_blank")
+                                           ],style={'textAlign':'center','font-family':'Arial', 'font-size':20})
+                               ]),
+                               html.Br(),
+                               html.Br(),
+                               html.H4('Tekijä', style = {'text-align':'center'}),
+                               html.Br(),
+                               html.Div(style = {'text-align':'center'},children = [
+                                   html.I('Tuomas Poukkula', style = {'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                                   html.Br(),
+                                   html.A('Seuraa LinkedIn:ssä', href='https://www.linkedin.com/in/tuomaspoukkula/', target = '_blank',style = {'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                                   html.Br(),
+                                   html.A('tai Twitterissä.', href='https://twitter.com/TuomasPoukkula', target = '_blank',style = {'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                                   html.Br(),
+                                   html.Br(),
+                                   html.Label(['Sovellus ', 
+                                            html.A('GitHub:ssa', href='https://github.com/tuopouk/vaestometsa/tree/master')
+                                           ],style={'textAlign':'center','font-family':'Arial', 'font-size':20})
+                               ])
+                          ])
+                      ])
+
+                           
+
                        
                        
       
@@ -1218,7 +1236,7 @@ def serve_layout():
                  )
   
                
-               ])
+              ])
         
   
 
@@ -1241,24 +1259,24 @@ def update_buttons(n_clicks):
     
     if n_clicks > 0:
         
-        return [dbc.Col(width=dict(size = 12, offset = 5), children=[
+        return [dbc.Col(children=[
 
-                dbc.Button('Lataa karttanäkymä',
-                           id='map_button',
-                           n_clicks=0,
-                           outline=True,
-                           size = 'lg',
-                           color = 'success'
-                           ),
                 dbc.Button(children=[html.I(className="fa fa-download mr-1"), 'Lataa tiedosto koneelle'],
                            id='download_button',
                            n_clicks=0,
                            outline=True,
                            size = 'lg',
                            color = 'primary'
-                           )   
+                           ),
+                dbc.Button('Lataa karttanäkymä',
+                           id='map_button',
+                           n_clicks=0,
+                           outline=True,
+                           size = 'lg',
+                           color = 'success'
+                           ),            
                 
-               ]
+               ],xs =10, sm=8, md=5, lg=6, xl=7
                       )]
 
 
@@ -1309,11 +1327,11 @@ def update_count_and_map(n_clicks, dataset):
                                 html.Br(),
                                 html.Div(id = 'metrics'),
 
-                        ]),
+                        ],xs =12, sm=12, md=6, lg=6, xl=6),
                  dbc.Col(
                          children=[
                           dcc.Loading(children=[html.Div(id = 'map_div')], type = spinners[random.randint(0,len(spinners)-1)])
-                         ])
+                         ],xs =12, sm=12, md=6, lg=6, xl=6)
                ]
  
 
@@ -1329,7 +1347,7 @@ def update_correlations(n_clicks, dataset):
             feature_names = sorted([f['label'] for f in feature_selections])
             
             return [
-                    dbc.Col(width = dict(size = 3),
+                    dbc.Col(
                             children=[
                                 html.Br(),
                                 html.Br(),
@@ -1351,7 +1369,7 @@ def update_correlations(n_clicks, dataset):
                                             ),
                                 html.Br(),
                                 html.Br(),
-                                html.P('Oikealla olevassa kuvaajassa esitetään kahden valitun muuttujan klusterikohtaiset keskiarvot sirontakuviona. Näin voidaan tarkastella muuttujien korrelaatiota sekä muodostaa kuva klustereiden profiileista.',
+                                html.P('Viereisessä kuvaajassa esitetään kahden valitun muuttujan klusterikohtaiset keskiarvot sirontakuviona. Näin voidaan tarkastella muuttujien korrelaatiota sekä muodostaa kuva klustereiden profiileista.',
                                       style = {'font-size':20, 'font-family':'Arial'}),
                                 html.P('Kuviossa on myös koko maan vertailukohta esitetty harmaalla viisikulmiolla.',
                                       style = {'font-size':20, 'font-family':'Arial'}
@@ -1364,8 +1382,8 @@ def update_correlations(n_clicks, dataset):
                                       )
                                 
 
-                            ]),
-                     dbc.Col(id = 'correlation_div',width = dict(size = 9))
+                            ],xs =12, sm=12, md=12, lg=3, xl=3),
+                     dbc.Col(id = 'correlation_div',xs =12, sm=12, md=12, lg=9, xl=9)
                              
                    ]
 
@@ -1444,7 +1462,7 @@ def update_cluster_and_extra_feature(n_clicks, dataset, cluster_features):
                               html.Div(id = 'feature_graph_div')
                              
 
-                        ]),
+                        ],xs =12, sm=2, md=6, lg=6, xl=6),
                  dbc.Col(
                          children=[
                               html.H3('Tarkastele klustereita muun avainluvun mukaan.',style={'textAlign':'center',
@@ -1464,7 +1482,7 @@ def update_cluster_and_extra_feature(n_clicks, dataset, cluster_features):
                                      options =  [{'label':f,'value':f,'title':'Muu avainluku'} for f in extra_features],
                                           multi = False),
                               html.Div(id = 'extra_feature_graph_div')
-                         ])
+                         ],xs =12, sm=12, md=6, lg=6, xl=6)
                ]
              
 
@@ -1635,4 +1653,4 @@ def update_feature_list(on):
  
 app.layout = serve_layout
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=False)
