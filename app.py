@@ -1323,14 +1323,15 @@ def serve_layout():
         html.Div(id = 'hidden_data_div',
                   children= [
                             dcc.Store(id='data_store'),
+                            dcc.Store(id='country_store'),
+                            dcc.Store(id='fin_store'),
                             dcc.Download(id = "download-component")
                            ]
                  )
   
                
               ])
-        
-  
+
 
 @app.callback(
     Output('select_all','on'),
@@ -1436,13 +1437,19 @@ def update_buttons(n_clicks):
                       )]
 
 
+#@app.callback(
+    #ServersideOutput('data_store','data'),
 @app.callback(
-    ServersideOutput('data_store','data'),
+    [ServersideOutput('data_store','data'), 
+     ServersideOutput('country_store','data'), 
+     ServersideOutput('fin_store','data')
+    ],
     [Input('cluster_button','n_clicks'),
-     State('area', 'value'),
+    State('area', 'value'),
     State('n_clusters', 'value'),
     State('features','value'),
-    State('pca_switch','on')]
+    State('pca_switch','on')],
+    memoize=True
 )
 def perform_clustering(n_clicks,area, n_clusters, features, pca):
     
@@ -1460,9 +1467,11 @@ def perform_clustering(n_clicks,area, n_clusters, features, pca):
         
         suomi = get_baseline(data, koko_maa)
         
-        return {'data':data.reset_index().to_dict('records'), 
-                    'koko_maa':koko_maa.reset_index().to_dict('records'), 
-                    'suomi':suomi.reset_index().to_dict('records') }
+        return data, koko_maa, suomi
+        
+#         return {'data':data.reset_index().to_dict('records'), 
+#                     'koko_maa':koko_maa.reset_index().to_dict('records'), 
+#                     'suomi':suomi.reset_index().to_dict('records') }
         
         
 
@@ -1472,7 +1481,7 @@ def perform_clustering(n_clicks,area, n_clusters, features, pca):
     [Input('cluster_button','n_clicks'),
      State('data_store', 'data')]
 )
-def update_count_and_map(n_clicks, dataset):
+def update_count_and_map(n_clicks, data):
     
     if n_clicks > 0:
 
@@ -1501,7 +1510,7 @@ def update_count_and_map(n_clicks, dataset):
     [Input('cluster_button','n_clicks'),
      State('data_store', 'data')]
 )
-def update_correlations(n_clicks, dataset):
+def update_correlations(n_clicks, data):
     
         if n_clicks > 0:
 
@@ -1553,17 +1562,22 @@ def update_correlations(n_clicks, dataset):
     Output('correlation_div', 'children'),
     [Input('feature1', 'value'),
     Input('feature2', 'value'),
-    Input('data_store','data')]
+    Input('data_store','data'),
+    Input('country_store','data'),
+    Input('fin_store','data')]
 )
-def update_correlation_plot(feature1, feature2, dataset):
+def update_correlation_plot(feature1, feature2, data, koko_maa, suomi):
     
     return dcc.Graph(id = 'correlation_plot', 
-                     figure = plot_correlations(pd.DataFrame(dataset['data']).set_index('Alue'), 
-                                          pd.DataFrame(dataset['koko_maa']).set_index('dimensions'), 
-                                          pd.DataFrame(dataset['suomi']).set_index('dimensions'), 
-                                          feature1, 
-                                          feature2)
-                     )
+                     figure = plot_correlations(data, koko_maa, suomi, feature1, feature2)
+                    )
+
+#                      figure = plot_correlations(pd.DataFrame(dataset['data']).set_index('Alue'), 
+#                                           pd.DataFrame(dataset['koko_maa']).set_index('dimensions'), 
+#                                           pd.DataFrame(dataset['suomi']).set_index('dimensions'), 
+#                                           feature1, 
+#                                           feature2)
+                     
        
         
 @app.callback(
@@ -1596,7 +1610,7 @@ def update_feature1_dd(value):
      State('data_store', 'data'),
     State('features','value')]
 )
-def update_cluster_and_extra_feature(n_clicks, dataset, cluster_features):
+def update_cluster_and_extra_feature(n_clicks, data, cluster_features):
     
     if n_clicks > 0:
         
@@ -1653,37 +1667,47 @@ def update_cluster_and_extra_feature(n_clicks, dataset, cluster_features):
 @app.callback(
     Output('feature_graph_div','children'),
     [Input('data_store','data'),
+     Input('country_store','data'),
+     Input('fin_store','data'),
      Input('single_feature','value')]
 )
-def plot_feature_graph(dataset, single_feature):
+def plot_feature_graph(data,koko_maa,suomi, single_feature):
 
 
-    return dcc.Graph(id = 'feature_graph', figure = plot_feature(pd.DataFrame(dataset['suomi']).set_index('dimensions'),
-                       pd.DataFrame(dataset['data']).set_index('Alue'),
-                       pd.DataFrame(dataset['koko_maa']).set_index('dimensions'),
-                       single_feature))
+    return dcc.Graph(id = 'feature_graph', 
+                     figure = plot_feature(suomi, data, koko_maa, single_feature)
+                    )
+#                      figure = plot_feature(pd.DataFrame(dataset['suomi']).set_index('dimensions'),
+#                        pd.DataFrame(dataset['data']).set_index('Alue'),
+#                        pd.DataFrame(dataset['koko_maa']).set_index('dimensions'),
+#                        single_feature))
 
  
 @app.callback(
     Output('extra_feature_graph_div','children'),
     [Input('data_store','data'),
+     Input('country_store','data'),
+     Input('fin_store','data'),
      Input('extra_feature','value')]
 )
-def plot_extra_feature_graph(dataset,extra_feature):
+def plot_extra_feature_graph(data,koko_maa,suomi,extra_feature):
     
-    return dcc.Graph(id = 'extra_feature_graph', figure = plot_feature(pd.DataFrame(dataset['suomi']).set_index('dimensions'),
-                       pd.DataFrame(dataset['data']).set_index('Alue'),
-                       pd.DataFrame(dataset['koko_maa']).set_index('dimensions'),
-                       extra_feature))
+    return dcc.Graph(id = 'extra_feature_graph', 
+                     figure = plot_feature(suomi, data, koko_maa, extra_feature)
+                    )
+#                      figure = plot_feature(pd.DataFrame(dataset['suomi']).set_index('dimensions'),
+#                        pd.DataFrame(dataset['data']).set_index('Alue'),
+#                        pd.DataFrame(dataset['koko_maa']).set_index('dimensions'),
+#                        extra_feature))
 
 
 @app.callback(
     Output('count_plot', 'figure'),
     [Input('data_store','data')]
 )
-def plot_count_graph(dataset):
+def plot_count_graph(data):
     
-    return plot_counts(pd.DataFrame(dataset['data']).set_index('Alue'))
+    return plot_counts(data)#plot_counts(pd.DataFrame(dataset['data']).set_index('Alue'))
 
 
 
@@ -1693,10 +1717,10 @@ def plot_count_graph(dataset):
    
     [Input('data_store','data')]
 )
-def update_metrics_label(dataset):
+def update_metrics_label(data):
     
     
-    data = pd.DataFrame(dataset['data']).set_index('Alue')
+    #data = pd.DataFrame(dataset['data']).set_index('Alue')
     inertia = data.inertia.values[0]
     silhouette = data.silhouette.values[0]
     
@@ -1715,14 +1739,16 @@ def update_metrics_label(dataset):
     [Input('map_button','n_clicks'),
      State('data_store','data')]
 )
-def plot_cluster_map(n_clicks, dataset):
+def plot_cluster_map(n_clicks, data):
     
     
     if n_clicks > 0:
         
-        data = pd.DataFrame(dataset['data']).set_index('Alue')
+        #data = pd.DataFrame(dataset['data']).set_index('Alue')
         
         area = data.Aluejako.values[0]
+        
+        
 
         geojson = geojson_map[area]
 
@@ -1755,12 +1781,12 @@ def update_n_cluster_view(n_clusters):
     ]
     
 )
-def download(n_clicks, dataset):
+def download(n_clicks, data):
     
     if n_clicks > 0:
         
         
-        data = pd.DataFrame(dataset['data']).set_index('Alue')
+        #data = pd.DataFrame(dataset['data']).set_index('Alue')
         
         inertia = data.inertia.values[0]
         silhouette = data.silhouette.values[0]
@@ -1818,4 +1844,4 @@ def update_feature_list(on):
  
 app.layout = serve_layout
 if __name__ == "__main__":
-    app.run_server(debug=False)
+    app.run_server(debug=False,threaded=True)
