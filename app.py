@@ -618,7 +618,7 @@ spinners = ['graph', 'cube', 'circle', 'dot' ,'default']
 server = Flask(__name__)
 server.secret_key = os.environ.get('secret_key','secret')
 app = Dash(name = __name__, 
-           #prevent_initial_callbacks = True, 
+           prevent_initial_callbacks = True, 
            server = server,
            meta_tags = [{'name':'viewport',
                         'content':'width=device-width, initial_scale=1.0, maximum_scale=1.2, minimum_scale=0.5'}],
@@ -731,19 +731,19 @@ def cluster_data(n_clusters, data, features):
 
     return data
 
-def test_clusters(data, features):
+# def test_clusters(data, features):
     
        
-    return pd.DataFrame([{'clusters':k, 'inertia':(KMeans(n_clusters = k, random_state = 42).fit(StandardScaler().fit_transform(data[features]))).inertia_} for k in range(2,11)])
+#     return pd.DataFrame([{'clusters':k, 'inertia':(KMeans(n_clusters = k, random_state = 42).fit(StandardScaler().fit_transform(data[features]))).inertia_} for k in range(2,11)])
 
-def test_clusters_with_PCA(data, features):
+# def test_clusters_with_PCA(data, features):
     
-    X = StandardScaler().fit_transform(data[features])
-    pca = PCA(n_components=len(features))
-    principalComponents = pca.fit_transform(X)
-    PCA_components = pd.DataFrame(principalComponents)
+#     X = StandardScaler().fit_transform(data[features])
+#     pca = PCA(n_components=len(features))
+#     principalComponents = pca.fit_transform(X)
+#     PCA_components = pd.DataFrame(principalComponents)
 
-    return pd.DataFrame([{'clusters':k, 'inertia':KMeans(n_clusters = k, random_state = 42).fit(PCA_components.iloc[:,:3]).inertia_} for k in range(2,11)])
+#     return pd.DataFrame([{'clusters':k, 'inertia':KMeans(n_clusters = k, random_state = 42).fit(PCA_components.iloc[:,:3]).inertia_} for k in range(2,11)])
 
 def cluster_data_with_PCA(n_clusters, data, features):
     
@@ -1040,7 +1040,7 @@ def plot_correlations(data, koko_maa, suomi, feature1, feature2):
                                  hoverlabel = dict(font_size = 16, font_family = 'Arial'),
                                  xaxis=dict(title = dict(text=feature1, font=dict(size=18, family = 'Arial Black')), tickformat = ' ', tickfont = dict(size=14)), 
                                  yaxis=dict(title = dict(text=feature2, font=dict(size=18, family = 'Arial Black')), tickformat = ' ', tickfont = dict(size=14)),
-                                 title = dict(text = title_text, x=.5, font=dict(size=20,family = 'Arial')),
+                                 title = dict(text = title_text, x=.5, font=dict(size=28,family = 'Arial')),
                                  legend = dict(title = '<b>Klusterit</b>',font=dict(size=18))
                                             
                                 )
@@ -1206,15 +1206,15 @@ def serve_layout():
                         dbc.Row(id = 'correlations')
                 
             ]),
-            dbc.Tab(label = 'Klustereiden määrän arviointi',
-                   tabClassName="flex-grow-1 text-center",
-                   tab_style = {'font-size':28},
-                   children = [
+#             dbc.Tab(label = 'Klustereiden määrän arviointi',
+#                    tabClassName="flex-grow-1 text-center",
+#                    tab_style = {'font-size':28},
+#                    children = [
                    
-                       html.Br(),
-                       dbc.Row(id = 'cluster_analysis', justify = 'center')
+#                        html.Br(),
+#                        dbc.Row(id = 'cluster_analysis', justify = 'center')
                    
-                   ]),
+#                    ]),
             dbc.Tab(label = 'Ohje ja esittely',
                    tabClassName="flex-grow-1 text-center",
                     tab_style = {'font-size':28},
@@ -1275,10 +1275,10 @@ def serve_layout():
                                             html.A('Pääkomponenttianalyysi', href = "https://fi.wikipedia.org/wiki/P%C3%A4%C3%A4komponenttianalyysi",target="_blank")
                                            ],style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
                                    html.Br(),
-                                   html.Label(['Wikipedia: ', 
-                                            html.A('Kyynärpäämetodi (englanniksi)', href = "https://en.wikipedia.org/wiki/Elbow_method_(clustering)",target="_blank")
-                                           ],style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
-                                   html.Br(),
+#                                    html.Label(['Wikipedia: ', 
+#                                             html.A('Kyynärpäämetodi (englanniksi)', href = "https://en.wikipedia.org/wiki/Elbow_method_(clustering)",target="_blank")
+#                                            ],style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
+#                                    html.Br(),
                                    html.Label(['Wikipedia: ', 
                                             html.A('käytetyt värit', href = "https://en.wikipedia.org/wiki/Lists_of_colors",target="_blank")
                                            ],style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
@@ -1341,69 +1341,71 @@ def update_switch(features):
     return len(features) == len(feature_selections)
         
     
-@app.callback(
+# @app.callback(
 
-    Output('cluster_analysis','children'),
-    [Input('features','value'),
-    Input('area','value')]
+#     Output('cluster_analysis','children'),
+    
+#     [Input('cluster_button','n_clicks'),
+#      State('features','value'),
+#     State('area','value')]
 
-)
-def update_cluster_analysis(features, area):
+# )
+# def update_cluster_analysis(n_clicks, features, area):
     
-    data = data_dict[area]
+#     data = data_dict[area]
     
-    test = test_clusters(data, features)
-    test_with_pca = test_clusters_with_PCA(data, features)
+#     test = test_clusters(data, features)
+#     test_with_pca = test_clusters_with_PCA(data, features)
     
-#    "<b>%{text}</b><br><br>" +
-#         "GDP per Capita: %{x:$,.0f}<br>" +
-#         "Life Expectation: %{y:.0%}<br>"
-    figure = go.Figure(data=[go.Scatter(x = test.clusters, 
-                                        y  = np.round(test.inertia,1), 
-                                        mode = 'lines+markers',
-                                        line = dict(color='firebrick', width=4),
-                                        hovertemplate = "<b>%{x} klusterilla</b>",
-                                        name = 'K-Means'),
-               go.Scatter(x = test_with_pca.clusters, 
-                          y  = test_with_pca.inertia,
-                          line = dict(color='royalblue', width=4),
-                          mode = 'lines+markers',
-                          name = 'K-Means ja PCA',
-                          hovertemplate = "<b>%{x} klusterilla</b>"
-                          )],
-                      layout = go.Layout(height = 800, 
-                                        title = dict(text = 'Klustereiden määrän arviointi '+area.lower()+'tasolla',
-                                                      x=.5,
-                                                      font=dict(family='Arial Black',size=28)
-                                                      ),
-                                        legend = dict(title = '<b>Klusterointitavat</b>', font=dict(size=18)),                                                      
-                                        yaxis = dict(title=dict(text='Inertia',font=dict(size=20, family = 'Arial Black')), 
+# #    "<b>%{text}</b><br><br>" +
+# #         "GDP per Capita: %{x:$,.0f}<br>" +
+# #         "Life Expectation: %{y:.0%}<br>"
+#     figure = go.Figure(data=[go.Scatter(x = test.clusters, 
+#                                         y  = np.round(test.inertia,1), 
+#                                         mode = 'lines+markers',
+#                                         line = dict(color='firebrick', width=4),
+#                                         hovertemplate = "<b>%{x} klusterilla</b>",
+#                                         name = 'K-Means'),
+#                go.Scatter(x = test_with_pca.clusters, 
+#                           y  = test_with_pca.inertia,
+#                           line = dict(color='royalblue', width=4),
+#                           mode = 'lines+markers',
+#                           name = 'K-Means ja PCA',
+#                           hovertemplate = "<b>%{x} klusterilla</b>"
+#                           )],
+#                       layout = go.Layout(height = 800, 
+#                                         title = dict(text = 'Klustereiden määrän arviointi '+area.lower()+'tasolla',
+#                                                       x=.5,
+#                                                       font=dict(family='Arial Black',size=28)
+#                                                       ),
+#                                         legend = dict(title = '<b>Klusterointitavat</b>', font=dict(size=18)),                                                      
+#                                         yaxis = dict(title=dict(text='Inertia',font=dict(size=20, family = 'Arial Black')), 
                                                     
-                                                  tickfont = dict(family = 'Arial Black', size =16)),
-                                        xaxis = dict(title= dict(text='Klustereiden määrä',font=dict(size=20, family = 'Arial Black')), 
-                                                   tickformat=' ',
-                                                   tickfont = dict(family = 'Arial', size =16)),
-                                         hovermode="x unified"
+#                                                   tickfont = dict(family = 'Arial Black', size =16)),
+#                                         xaxis = dict(title= dict(text='Klustereiden määrä',font=dict(size=20, family = 'Arial Black')), 
+#                                                    tickformat=' ',
+#                                                    tickfont = dict(family = 'Arial', size =16)),
+#                                          hovermode="x unified"
                                          
-                                        )
-                      )
+#                                         )
+#                       )
     
-    return [dbc.Col(align = 'center',children =[
+#     return [dbc.Col(align = 'center',children =[
                     
-                    html.H3('Klustereiden määrän arvoiminen'),
-                    html.Br(),
-                    html.P('Tarvittavaa klustereiden määrää voi substanssinäkökulman lisäksi arvioida myös datapohjaisesti. Optimaalisessa klusterijaossa klusterin alkiot ova lähellä toisiaan. Tätä suuretta voi hakea laskemalla inertia-suuret jokaisella mahdollisella määrällä klustereita ja tarkastelemalla niiden muutosta. Kun tämä esitetään oheisella viivakaaviolla eri määrillä klustereita, huomataan, että inertian laskee klustereiden määrän kasvaessa. Siinä kohtaa käyrää, jossa syntyy terävin kulma, on optimaalisin määrä klustereita. Tätä pistettä nimitetään myös kyynärpää-pisteeksi (elbow point), mikä perustuu käyrän muotoon.'),
-                    html.Br(),
-                    html.P('Testejä voi tehdä vain valitsemalla klusterointimuuttujat sekä aluetason. Oheisessa kuvaajassa näytetään inertiakäyrät klusteroinnilla sekä pääkomponenttianalyysiä hyödyntävällä klusteroinnilla.'),
-                    html.Br(),
-                    html.P('On myös mahdollista, että käyrä on hyvin pyöreä, jolloin selkeää kyynärpääpistettä ei löydy.')
+#                     html.H3('Klustereiden määrän arvoiminen'),
+#                     html.Br(),
+#                     html.P('Tarvittavaa klustereiden määrää voi substanssinäkökulman lisäksi arvioida myös datapohjaisesti. Optimaalisessa klusterijaossa klusterin alkiot ova lähellä toisiaan. Tätä suuretta voi hakea laskemalla inertia-suuret jokaisella mahdollisella määrällä klustereita ja tarkastelemalla niiden muutosta. Kun tämä esitetään oheisella viivakaaviolla eri määrillä klustereita, huomataan, että inertian laskee klustereiden määrän kasvaessa. Siinä kohtaa käyrää, jossa syntyy terävin kulma, on optimaalisin määrä klustereita. Tätä pistettä nimitetään myös kyynärpää-pisteeksi (elbow point), mikä perustuu käyrän muotoon.'),
+#                     html.Br(),
+#                     html.P('Testejä voi tehdä vain valitsemalla klusterointimuuttujat sekä aluetason. Oheisessa kuvaajassa näytetään inertiakäyrät klusteroinnilla sekä pääkomponenttianalyysiä hyödyntävällä klusteroinnilla.'),
+#                     html.Br(),
+#                     html.P('On myös mahdollista, että käyrä on hyvin pyöreä, jolloin selkeää kyynärpääpistettä ei löydy.')
 
-                    ],
-                    xs =12, sm=12, md=5, lg=3, xl=3),
-            dbc.Col(align = 'center',children = [
-                    dcc.Graph(id = 'inertia_curve', figure = figure)
-                    ],
-                    xs =12, sm=12, md=7, lg=9, xl=9)]
+#                     ],
+#                     xs =12, sm=12, md=5, lg=3, xl=3),
+#             dbc.Col(align = 'center',children = [
+#                     dcc.Graph(id = 'inertia_curve', figure = figure)
+#                     ],
+#                     xs =12, sm=12, md=7, lg=9, xl=9)]
 
 @app.callback(
     Output('other_buttons','children'),
