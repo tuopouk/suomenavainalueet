@@ -1040,7 +1040,7 @@ def plot_correlations(data, koko_maa, suomi, feature1, feature2):
                                  hoverlabel = dict(font_size = 16, font_family = 'Arial'),
                                  xaxis=dict(title = dict(text=feature1, font=dict(size=18, family = 'Arial Black')), tickformat = ' ', tickfont = dict(size=14)), 
                                  yaxis=dict(title = dict(text=feature2, font=dict(size=18, family = 'Arial Black')), tickformat = ' ', tickfont = dict(size=14)),
-                                 title = dict(text = title_text, x=.5, font=dict(size=28,family = 'Arial')),
+                                 title = dict(text = title_text, x=.5, font=dict(size=24,family = 'Arial')),
                                  legend = dict(title = '<b>Klusterit</b>',font=dict(size=18))
                                             
                                 )
