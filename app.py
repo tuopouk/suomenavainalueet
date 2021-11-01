@@ -756,15 +756,23 @@ def cluster_data(n_clusters, data, features):
 
 def cluster_data_with_PCA(n_clusters, data, features):
     
-    scl = StandardScaler()  
+    scl = StandardScaler()
+       
 
     x = data[features]
 
     X = scl.fit_transform(x)
     
-    pca = PCA(n_components = len(features))
+    
+    # Pääkomponentteja ei voi olla enemmän kuin alueita.
+    try:
+        pca = PCA(n_components = len(features), random_state = 42, svd_solver = 'auto')
+        principalComponents = pca.fit_transform(X)
+    except:
+        pca = PCA(n_components = min(len(data), len(features)), random_state = 42, svd_solver = 'auto')
+        principalComponents = pca.fit_transform(X)
 
-    principalComponents = pca.fit_transform(X)
+    
     
     PCA_components = pd.DataFrame(principalComponents)
 
