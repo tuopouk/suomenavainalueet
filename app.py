@@ -18,7 +18,7 @@ import io
 from dash_extensions.enrich import Dash, ServersideOutput, Output, Input, State, Trigger
 from dash.exceptions import PreventUpdate
 import plotly.express as px
-import json
+import orjson
 import random
 import dash_bootstrap_components as dbc
 from sklearn.metrics import silhouette_score
@@ -600,16 +600,16 @@ seutukunta_perusmuoto = {'Etelä-Pirkanmaan seutukunta': 'Etelä-Pirkanmaa',
 
 # https://geo.stat.fi/geoserver/wfs?service=WFS&version=2.0.0&request=GetFeature&typeName=tilastointialueet:kunta1000k_2021&outputFormat=json
 with open('kunnat_tk_4326.json', encoding = 'ISO-8859-1') as f:
-    kuntarajat = json.load(f)
+    kuntarajat = orjson.loads(f.read())
 
     
 # https://geo.stat.fi/geoserver/wfs?service=WFS&version=2.0.0&request=GetFeature&typeName=maakunta1000k_2021&outputFormat=json
 with open('maakunnat_tk_4326.json', encoding = 'ISO-8859-1') as f:
-    maakuntarajat = json.load(f)
+    maakuntarajat = orjson.loads(f.read())
     
 # https://geo.stat.fi/geoserver/wfs?service=WFS&version=2.0.0&request=GetFeature&typeName=tilastointialueet:seutukunta1000k_2021&outputFormat=json    
 with open('seutukunnat_tk_4326.json', encoding = 'ISO-8859-1') as f:
-    seutukuntarajat = json.load(f)
+    seutukuntarajat = orjson.loads(f.read())
 
 geojson_map = {'Kunta':kuntarajat, 'Maakunta':maakuntarajat, 'Seutukunta': seutukuntarajat} 
 
