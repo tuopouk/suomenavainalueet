@@ -15,7 +15,7 @@ from flask import Flask
 import os
 import base64
 import io
-from dash_extensions.enrich import Dash, ServersideOutput, Output, Input, State, Trigger
+from dash_extensions.enrich import Dash, ServersideOutput, Output, Input, State
 from dash.exceptions import PreventUpdate
 import plotly.express as px
 import orjson
@@ -27,7 +27,6 @@ from datetime import datetime
 import io
 
 
-
 # Käytetyt värit.
 # https://en.wikipedia.org/wiki/List_of_colors:_A%E2%80%93F
 colors = pd.read_csv('colors_wikipedia.csv')
@@ -35,6 +34,8 @@ colors.index+=1
 colors.index = colors.index.astype(int)
 
 url = 'https://pxnet2.stat.fi:443/PXWeb/api/v1/fi/Kuntien_avainluvut/2021/kuntien_avainluvut_2021_viimeisin.px'
+
+# Kunta-kyselyn body
 
 kunta_payload = """
 
@@ -364,7 +365,7 @@ kunta_payload = """
   }
 }
 """
-
+# Maakunta-kyselyn body
 mk_payload = """
 
 {
@@ -404,7 +405,7 @@ mk_payload = """
 }
 
 """
-
+# Seutukunta-kyselyn body
 sk_payload = """
 
 {
@@ -618,9 +619,9 @@ spinners = ['graph', 'cube', 'circle', 'dot' ,'default']
 
 external_stylesheets = [dbc.themes.SUPERHERO,
                         "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css",
-                        'https://codepen.io/chriddyp/pen/brPBPO.css']
-                        
-                        
+                        'https://codepen.io/chriddyp/pen/brPBPO.css'
+                       ]
+
 
 server = Flask(__name__)
 server.secret_key = os.environ.get('secret_key','secret')
@@ -631,7 +632,6 @@ app = Dash(name = __name__,
                         'content':'width=device-width, initial_scale=1.0, maximum_scale=1.2, minimum_scale=0.5'}],
            external_stylesheets = external_stylesheets
           )
-           #external_stylesheets=[dbc.themes.JOURNAL,"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"])
 
 
 app.title = 'Suomen avainklusterit'
@@ -696,7 +696,7 @@ def get_area_counts():
 
 kuntamäärät_alueittain = get_area_counts()
 
-
+# Klusterointifunktio
 def cluster_data(n_clusters, data, features):
     
     scl = StandardScaler()  
@@ -740,6 +740,10 @@ def cluster_data(n_clusters, data, features):
 
     return data
 
+# Tämä osio on jätetty pois tuotannosta tehokkuussyistä.
+# Testeissä tämän lisääminen hidastaisi sovelluksen pyörimistä 
+# Herokun palvelimella huomattavasti.
+
 # def test_clusters(data, features):
     
        
@@ -754,6 +758,7 @@ def cluster_data(n_clusters, data, features):
 
 #     return pd.DataFrame([{'clusters':k, 'inertia':KMeans(n_clusters = k, random_state = 42).fit(PCA_components.iloc[:,:3]).inertia_} for k in range(2,11)])
 
+# Klusterointi PCA:lla
 def cluster_data_with_PCA(n_clusters, data, features):
     
     scl = StandardScaler()
@@ -811,19 +816,25 @@ def cluster_data_with_PCA(n_clusters, data, features):
 
     return data
 
+# Baseline -apufunktio
 def choose_value(primary, secondary, unit):
     
     if unit == '%' or '/' in unit:
         return primary
     else:
         return round(secondary,1)
+    
+# Baseline -apufunktio
 def label_value(value, primary):
     
     if value == primary:
         return 'Koko maa'
     else:
         return 'Keskiarvo'    
-    
+
+# Koko maan vertailuarvojen muodostaminen.
+# Käytännössä absoluuttisista suureista lasketaan keskiarvo
+# ja suhteellisista suureista käytetään valmista koko maan arvoa.
 def get_baseline(data, koko_maa):
     
     suomi = pd.DataFrame(koko_maa)
@@ -843,7 +854,7 @@ def get_baseline(data, koko_maa):
 
 
 
-def plot_feature(suomi, data, koko_maa, single_feature):
+def plot_feature(suomi, data, single_feature):
     
     aluejako = data.Aluejako.values[0]
     kuntamäärät = kuntamäärät_alueittain[aluejako]
@@ -1007,7 +1018,7 @@ def plot_map(data, geojson, aluetaso):
     return fig
 
 
-def plot_correlations(data, koko_maa, suomi, feature1, feature2):
+def plot_correlations(data, suomi, feature1, feature2):
     
     
     cdf = data.groupby(['cluster','color']).count().iloc[:,0].reset_index()
@@ -1100,11 +1111,11 @@ def serve_layout():
     
     return html.Div(children = [
         
-              
-               html.H1('Suomen avainklusterit',style={'textAlign':'center'}),
+               html.Br(),
+               html.H1('Suomen avainklusterit',style={'textAlign':'center', 'font-size':60}),
                html.Br(),
               
-               html.H3('klusterointityökalu',style={'textAlign':'center'}),
+               html.H3('klusterointityökalu',style={'textAlign':'center', 'font-size':30}),
                 html.Br(),
               
                 dbc.Row(children = [
@@ -1120,6 +1131,10 @@ def serve_layout():
                             placeholder = 'Valitse klusterointimuuttujat.'),
 
                        html.Br(),
+                       dbc.Alert("Valitse ainakin yksi avainluku valikosta!", color="danger",
+                                 dismissable=True, fade = True, is_open=False, id = 'alert', 
+                                 style = {'text-align':'center', 'font-size':18, 'font-family':'Arial Black'}),
+                       html.Br(), 
                        dash_daq.BooleanSwitch(id = 'select_all', 
                                               label = dict(label = 'Valitse kaikki',style = {'font-size':20, 'fontFamily':'Arial Black'}), 
                                               on = False, 
@@ -1184,8 +1199,9 @@ def serve_layout():
                                   color='success',
                                   style = dict(fontSize=28)
                                   ),
+            
 
-                    html.Br()
+                        html.Br()
                     
                      
                     ],justify='center'),
@@ -1292,6 +1308,10 @@ def serve_layout():
                                html.Br(),
                                html.P("Sivun ja sen sisältö tarjotaan ilmaiseksi sekä sellaisena kuin se on saatavilla. Kyseessä on yksityishenkilön tarjoama palvelu eikä viranomaispalvelu. Sivulta saatavan informaation hyödyntäminen on päätöksiä tekevien tahojen omalla vastuulla. Palvelun tarjoaja ei ole vastuussa menetyksistä, oikeudenkäynneistä, vaateista, kanteista, vaatimuksista, tai kustannuksista taikka vahingosta, olivat ne mitä tahansa tai aiheutuivat ne sitten miten tahansa, jotka johtuvat joko suoraan tai välillisesti yhteydestä palvelun käytöstä. Huomioi, että tämä sivu on yhä kehityksen alla.",style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
                                html.Br(),
+                               html.H4('Tuetut selaimet',style={'textAlign':'center'}),
+                               html.Br(),
+                               html.P("Sovellus on testattu toimivaksi Google Chromella ja Mozilla Firefoxilla. Edge- ja Internet Explorer -selaimissa sovellus ei toimi. Opera, Safari -ja muita selaimia ei ole testattu.",style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                               html.Br(),
                                html.Div(style={'text-align':'center'},children = [
                                    html.H4('Lähteet', style = {'text-align':'center'}),
                                    html.Br(),
@@ -1359,7 +1379,7 @@ def serve_layout():
         html.Div(id = 'hidden_data_div',
                   children= [
                             dcc.Store(id='data_store'),
-                            dcc.Store(id='country_store'),
+                           # dcc.Store(id='country_store'),
                             dcc.Store(id='fin_store'),
                             dcc.Download(id = "download-component")
                            ]
@@ -1368,6 +1388,16 @@ def serve_layout():
                
               ])
 
+
+@app.callback(
+
+    Output('alert', 'is_open'),
+    [Input('features','value')]
+
+)
+def update_alert(features):
+    
+    return len(features) == 0
 
 @app.callback(
     Output('select_all','on'),
@@ -1477,7 +1507,7 @@ def update_buttons(n_clicks):
     #ServersideOutput('data_store','data'),
 @app.callback(
     [ServersideOutput('data_store','data'), 
-     ServersideOutput('country_store','data'), 
+    # ServersideOutput('country_store','data'), 
      ServersideOutput('fin_store','data')
     ],
     [Input('cluster_button','n_clicks'),
@@ -1503,7 +1533,7 @@ def perform_clustering(n_clicks,area, n_clusters, features, pca):
         
         suomi = get_baseline(data, koko_maa)
         
-        return data, koko_maa, suomi
+        return data, suomi
         
 #         return {'data':data.reset_index().to_dict('records'), 
 #                     'koko_maa':koko_maa.reset_index().to_dict('records'), 
@@ -1603,21 +1633,15 @@ def update_correlations(n_clicks, data):
     [Input('feature1', 'value'),
     Input('feature2', 'value'),
     Input('data_store','data'),
-    Input('country_store','data'),
+   # Input('country_store','data'),
     Input('fin_store','data')]
 )
-def update_correlation_plot(feature1, feature2, data, koko_maa, suomi):
+def update_correlation_plot(feature1, feature2, data,  suomi):
     
     return dcc.Graph(id = 'correlation_plot', 
-                     figure = plot_correlations(data, koko_maa, suomi, feature1, feature2)
+                     figure = plot_correlations(data,  suomi, feature1, feature2)
                     )
-
-#                      figure = plot_correlations(pd.DataFrame(dataset['data']).set_index('Alue'), 
-#                                           pd.DataFrame(dataset['koko_maa']).set_index('dimensions'), 
-#                                           pd.DataFrame(dataset['suomi']).set_index('dimensions'), 
-#                                           feature1, 
-#                                           feature2)
-                     
+                    
        
         
 @app.callback(
@@ -1713,39 +1737,32 @@ def update_cluster_and_extra_feature(n_clicks, data, cluster_features):
 @app.callback(
     Output('feature_graph_div','children'),
     [Input('data_store','data'),
-     Input('country_store','data'),
      Input('fin_store','data'),
      Input('single_feature','value')]
 )
-def plot_feature_graph(data,koko_maa,suomi, single_feature):
+def plot_feature_graph(data,suomi, single_feature):
 
 
     return dcc.Graph(id = 'feature_graph', 
-                     figure = plot_feature(suomi, data, koko_maa, single_feature)
+                     figure = plot_feature(suomi, data, single_feature)
                     )
-#                      figure = plot_feature(pd.DataFrame(dataset['suomi']).set_index('dimensions'),
-#                        pd.DataFrame(dataset['data']).set_index('Alue'),
-#                        pd.DataFrame(dataset['koko_maa']).set_index('dimensions'),
-#                        single_feature))
+
 
  
 @app.callback(
     Output('extra_feature_graph_div','children'),
     [Input('data_store','data'),
-     Input('country_store','data'),
+     #Input('country_store','data'),
      Input('fin_store','data'),
      Input('extra_feature','value')]
 )
-def plot_extra_feature_graph(data,koko_maa,suomi,extra_feature):
+def plot_extra_feature_graph(data,suomi,extra_feature):
     
     
     return dcc.Graph(id = 'extra_feature_graph', 
-                     figure = plot_feature(suomi, data, koko_maa, extra_feature)
+                     figure = plot_feature(suomi, data, extra_feature)
                     )
-#                      figure = plot_feature(pd.DataFrame(dataset['suomi']).set_index('dimensions'),
-#                        pd.DataFrame(dataset['data']).set_index('Alue'),
-#                        pd.DataFrame(dataset['koko_maa']).set_index('dimensions'),
-#                        extra_feature))
+
 
 
 @app.callback(
@@ -1766,9 +1783,7 @@ def plot_count_graph(data):
     [Input('data_store','data')]
 )
 def update_metrics_label(data):
-    
-    
-    #data = pd.DataFrame(dataset['data']).set_index('Alue')
+
     inertia = data.inertia.values[0]
     silhouette = data.silhouette.values[0]
     
@@ -1792,24 +1807,22 @@ def plot_cluster_map(n_clicks, data):
     
     if n_clicks > 0:
         
-        #data = pd.DataFrame(dataset['data']).set_index('Alue')
-        
+                
         area = data.Aluejako.values[0]
         
         
 
         geojson = geojson_map[area]
-
+                
         cluster_map = plot_map(data, geojson, area)
-        
-        
+
 
         return html.Div(children =[html.H3('Klusterit {}'.format(area.lower()).replace('kunta','kunnittain'), style ={'textAlign': 'center','fontSize':40, 'family':'Arial Black'}),html.Br(),
                                    dcc.Graph(id = 'cluster_map', figure = cluster_map),
                                    html.P('Jos kartta ei näy, kokeile toisella selaimella.',
                                           style={'font-size':20,'font-family':'Arial'}),
                                   html.P('Kartassa näkyy värikoodattuna mihin klusteriin kukin '+area.lower()+' kuuluu. Selitteestä voit kaksoisklikkaamalla valita yhden klusterin, johon kuuluvat alueet haluat näyttää kartalla. Voit myös yhdellä klikkauksella valita mitä klustereita näytetään. Karttaa voi liikuttaa hiiren vasemmalla napilla. Oikealla napilla pystyy kiertämään karttaa. Oikeasta yläkulmasta selitteen yläpuolelta löytyy valintatyökalut, joista voi myös tallentaa kartan kuvana.',
-                                        {'font-size':20,'font-family':'Arial'}),
+                                        style = {'font-size':20,'font-family':'Arial'}),
 
                                   ])
         
@@ -1832,9 +1845,7 @@ def update_n_cluster_view(n_clusters):
 def download(n_clicks, data):
     
     if n_clicks > 0:
-        
-        
-        #data = pd.DataFrame(dataset['data']).set_index('Alue')
+
         
         inertia = data.inertia.values[0]
         silhouette = data.silhouette.values[0]
