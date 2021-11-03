@@ -1,4 +1,4 @@
-# suomenavainklusterit
+# Suomen avainklusterit
 K-Means klusterointi Tilastokeskuksen kuntien avainluvut -datasetillä
 
 Tässä on sovellus, jolla voi tehdä klusterointia perustuen kuntien avainluvut-datasettiin. Kuntien avainluvut luetaan sovellukseen suoraan Tilastokeskuksen rajapinnan kautta.
