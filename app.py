@@ -626,7 +626,7 @@ external_stylesheets = [dbc.themes.SUPERHERO,
 server = Flask(__name__)
 server.secret_key = os.environ.get('secret_key','secret')
 app = Dash(name = __name__, 
-           prevent_initial_callbacks = True, 
+           prevent_initial_callbacks = False, 
            server = server,
            meta_tags = [{'name':'viewport',
                         'content':'width=device-width, initial_scale=1.0, maximum_scale=1.2, minimum_scale=0.5'}],
@@ -908,7 +908,7 @@ def plot_feature(suomi, data, single_feature):
     
     figure = go.Figure(data = traces,
 
-                   layout = go.Layout(title = dict(text = '<b>'+single_feature+'</b>'+'<br>Keskiarvot klustereittain sekä '+(label.lower()+'n vertailuarvo').replace('keskiarvon vertailuarvo', 'koko maan keskiarvo')+' (N = '+aluejako.replace('ta','tien')+' määrä klusterissa)'+'</br>', x=.5,font=dict(family='Arial',size=24)),
+                   layout = go.Layout(title = dict(text = '<b>'+single_feature+'</b>'+'<br>Keskiarvot klustereittain sekä '+(label.lower()+'n vertailuarvo').replace('keskiarvon vertailuarvo', 'koko maan keskiarvo')+' (N = '+aluejako.replace('ta','tien')+' määrä klusterissa)'+'</br>', x=.5,font=dict(family='Arial',size=22)),
                                       legend = dict(title = '<b>Klusterit</b>', font=dict(size=18)),
                                       hoverlabel = dict(font_size = 16, font_family = 'Arial'),
                                       template = 'seaborn',
@@ -1101,7 +1101,7 @@ max_clusters = {'Kunta':len(kunnat_data),
                'Maakunta':len(maakunnat_data),
                'Seutukunta':len(seutukunnat_data)}
 
-initial_features = [f['label'] for f in feature_selections if '2018' in f['label']]
+initial_features = [f['label'] for f in feature_selections if 'yö' in f['label']]
 
 
 initial_n_clusters = 4
@@ -1140,7 +1140,7 @@ def serve_layout():
                                               on = False, 
                                               color = 'blue') 
 
-                    ],xs =10, sm=8, md=5, lg=6, xl=6),
+                    ],xs =10, sm=8, md=5, lg=6, xl=6, align = 'center'),
                 
                   
                    
@@ -1180,14 +1180,14 @@ def serve_layout():
                        html.Div(id = 'slider_update', children = [html.P('Valitsit {} klusteria.'.format(initial_n_clusters),style = {'textAlign':'center', 'fontSize':24, 'fontFamily':'Arial Black'})]),
                        html.Br(),
                    ],xs =10, sm=8, md=5, lg=6, xl=6)
-                ]),
+                ], style = {'margin' : '10px 10px 10px 10px'}),
         
         # 4. rivi
         dbc.Row([dash_daq.BooleanSwitch(id = 'pca_switch', 
                                          label = dict(label = 'Käytä pääkomponenttianalyysia',style = {'font-size':20, 'fontFamily':'Arial Black'}), 
                                           on = False, 
                                           color = 'blue')],
-               justify='center',align="start"),
+               justify='center',align="start", style = {'margin' : '10px 10px 10px 10px'}),
         html.Div([html.Br()]),
         dbc.Row([
                        dbc.Button('Klusteroi',
@@ -1204,7 +1204,7 @@ def serve_layout():
                         html.Br()
                     
                      
-                    ],justify='center'),
+                    ],justify='center', style = {'margin' : '10px 10px 10px 10px'}),
         
         html.Br(),
         
@@ -1217,9 +1217,9 @@ def serve_layout():
 
                 
                 html.Br(),
-                dbc.Row(id = 'other_buttons',justify='end'),
+                dbc.Row(id = 'other_buttons',justify='end', style = {'margin' : '10px 10px 10px 10px'}),
                 html.Br(),
-                dbc.Row( id = 'count_and_map')
+                dbc.Row( id = 'count_and_map', style = {'margin' : '10px 10px 10px 10px'})
                 
             ]),
             
@@ -1230,7 +1230,7 @@ def serve_layout():
 
                         
                         html.Br(),
-                        dbc.Row(id = 'cluster_and_extra_feature')
+                        dbc.Row(id = 'cluster_and_extra_feature', style = {'margin' : '10px 10px 10px 10px'})
                 
             ]),
             dbc.Tab(label = 'Klustereiden tarkastelu kahden avainluvun mukaan',
@@ -1241,7 +1241,7 @@ def serve_layout():
                        
                         html.Br(),
                         html.Br(),
-                        dbc.Row(id = 'correlations')
+                        dbc.Row(id = 'correlations', style = {'margin' : '10px 10px 10px 10px'})
                 
             ]),
 #             dbc.Tab(label = 'Klustereiden määrän arviointi',
@@ -1379,7 +1379,6 @@ def serve_layout():
         html.Div(id = 'hidden_data_div',
                   children= [
                             dcc.Store(id='data_store'),
-                           # dcc.Store(id='country_store'),
                             dcc.Store(id='fin_store'),
                             dcc.Download(id = "download-component")
                            ]
@@ -1404,6 +1403,27 @@ def update_alert(features):
     [Input('features','value')]
 )    
 def update_switch(features):
+            
+    return len(features) == len(feature_selections)
+
+
+@app.callback(
+    Output('select_all','label'),
+    [Input('features','value')]
+)    
+def update_switch_label(features):
+            
+    return {True: {'label':'Kaikki avainluvut on valittu. Voit poistaa avainlukuja listasta klikkaamalla rasteista.',
+                   'style':{'text-align':'center', 'font-size':20, 'font-family':'Arial Black'}
+                  }, 
+            False:dict(label = 'Valitse kaikki',style = {'font-size':20, 'fontFamily':'Arial Black'})}[len(features) == len(feature_selections)]
+
+
+@app.callback(
+    Output('select_all','disabled'),
+    [Input('features','value')]
+)    
+def update_switch_enabling(features):
             
     return len(features) == len(feature_selections)
         
@@ -1480,9 +1500,9 @@ def update_switch(features):
 )
 def update_buttons(n_clicks):
     
-    if n_clicks > 0:
+    #if n_clicks > 0:
         
-        return [dbc.Col(children=[
+    return [dbc.Col(children=[
 
                 dbc.Button(children=[html.I(className="fa fa-download mr-1"), 'Lataa tiedosto koneelle'],
                            id='download_button',
@@ -1502,12 +1522,8 @@ def update_buttons(n_clicks):
                ],xs =10, sm=8, md=5, lg=6, xl=7
                       )]
 
-
-#@app.callback(
-    #ServersideOutput('data_store','data'),
 @app.callback(
     [ServersideOutput('data_store','data'), 
-    # ServersideOutput('country_store','data'), 
      ServersideOutput('fin_store','data')
     ],
     [Input('cluster_button','n_clicks'),
@@ -1527,63 +1543,59 @@ def perform_clustering(n_clicks,area, n_clusters, features, pca):
         data = {True: cluster_data_with_PCA(n_clusters, data, features),
                 False: cluster_data(n_clusters, data, features)
                }[pca]
-        #data = cluster_data(n_clusters, data, features)
-        
+       
         koko_maa = koko_maa_dict[area]
         
         suomi = get_baseline(data, koko_maa)
         
         return data, suomi
-        
-#         return {'data':data.reset_index().to_dict('records'), 
-#                     'koko_maa':koko_maa.reset_index().to_dict('records'), 
-#                     'suomi':suomi.reset_index().to_dict('records') }
+
         
         
 
 
 @app.callback(
     Output('count_and_map','children'),
-    [Input('cluster_button','n_clicks'),
-     State('data_store', 'data')]
+    [Input('cluster_button','n_clicks')]
 )
-def update_count_and_map(n_clicks, data):
+def update_count_and_map(n_clicks):
     
     if n_clicks > 0:
 
         return [
-                dbc.Col(
-                        children=[
-                            
-                            dcc.Graph(id = 'count_plot'),
-                                html.P('Tämä kuvaaja havainnollistaa kuinka paljon alueita on jokaisessa klusterissa.',
-                                      style = {'font-size':18, 'font-family':'Arial'}),
-                                html.P('Klusteroinnista on myös laskettu inertia, -ja siluettisuureet. Lisätietoa saa alla olevista linkeistä sekä "Ohje ja esittely" -välilehdellä.',
-                                      style = {'font-size':18, 'font-family':'Arial'}),
-                                html.Br(),
-                                html.Div(id = 'metrics'),
+                    dbc.Col(
+                            children=[
+                                html.Div(id = 'count_plot_div'),
 
-                        ],xs =12, sm=12, md=6, lg=6, xl=6),
-                 dbc.Col(
-                         children=[
-                          dcc.Loading(children=[html.Div(id = 'map_div')], type = spinners[random.randint(0,len(spinners)-1)])
-                         ],xs =12, sm=12, md=6, lg=6, xl=6)
+                            ],
+                        xs =12, sm=12, md=6, lg=6, xl=6, align = 'center'),
+                     dbc.Col(
+                             children=[
+                              dcc.Loading(children=[html.Div(id = 'map_div')], type = spinners[random.randint(0,len(spinners)-1)])
+                             ],xs =12, sm=12, md=6, lg=6, xl=6)
                ]
  
 
 @app.callback(
     Output('correlations', 'children'),
-    [Input('cluster_button','n_clicks'),
-     State('data_store', 'data')]
+    [Input('data_store', 'data')]
 )
-def update_correlations(n_clicks, data):
+def update_correlations(data):
     
-        if n_clicks > 0:
-
-            feature_names = sorted([f['label'] for f in feature_selections])
+    cluster_features = data.features.values[0].split(';')
             
-            return [
-                    dbc.Col(
+    cluster_features = [c.strip() for c in cluster_features]
+    
+    extra_features = sorted([f['label'] for f in feature_selections if f['label'] not in cluster_features])
+
+    options = [{'label':f,'value':f,'title':'Klusteroinnin avainluku'} for f in sorted(cluster_features) if f != 'value']+[{'label':f,'value':f,'title':'Muu avainluku'} for f in extra_features if f != 'value']
+            
+    value1 = cluster_features[np.random.randint(len(cluster_features))]
+    cluster_features.remove(value1)
+    value2 = cluster_features[np.random.randint(len(cluster_features))]
+
+    return [
+                     dbc.Col(
                             children=[
                                 html.Br(),
                                 html.Br(),
@@ -1591,21 +1603,21 @@ def update_correlations(n_clicks, data):
                                 html.Br(),
                                 dcc.Dropdown(id = 'feature1',
                                            
-                                            options = [{'label':f, 'value':f} for f in feature_names], 
-                                            value = feature_names[np.random.randint(len(feature_names))],
+                                            options = options, 
+                                            value = value1,
                                             multi = False,
                                             placeholder = 'Valitse ensimmäinen avainluku',
-                                             style = {'font-size':18, 'font-family':'Arial','color': 'black'}
+                                             style = {'font-size':16, 'font-family':'Arial','color': 'black'}
                                             ),
                                 html.Br(),
                                 html.H3('Valitse toinen avainluku'),
                                 html.Br(),
                                 dcc.Dropdown(id = 'feature2',
-                                            options = [{'label':f, 'value':f} for f in feature_names],
-                                            value = feature_names[np.random.randint(len(feature_names))],
+                                            options = options,
+                                            value = value2,
                                             multi = False,
                                             placeholder = 'Valitse toinen avainluku',
-                                             style = {'font-size':18, 'font-family':'Arial','color': 'black'}
+                                             style = {'font-size':16, 'font-family':'Arial','color': 'black'}
                                             ),
                                 html.Br(),
                                 html.Br(),
@@ -1633,13 +1645,12 @@ def update_correlations(n_clicks, data):
     [Input('feature1', 'value'),
     Input('feature2', 'value'),
     Input('data_store','data'),
-   # Input('country_store','data'),
     Input('fin_store','data')]
 )
 def update_correlation_plot(feature1, feature2, data,  suomi):
     
     return dcc.Graph(id = 'correlation_plot', 
-                     figure = plot_correlations(data,  suomi, feature1, feature2)
+                     figure = plot_correlations(data, suomi, feature1, feature2)
                     )
                     
        
@@ -1647,42 +1658,54 @@ def update_correlation_plot(feature1, feature2, data,  suomi):
 @app.callback(
 
     Output('feature2', 'options'),
-    [Input('feature1', 'value')]
+    [Input('feature1', 'value'),
+    State('data_store','data')]
 
 )
-def update_feature2_dd(value):
+def update_feature2_dd(value, data):
     
-    feature_names = sorted([f['label'] for f in feature_selections if f['label'] != value])
-    return [{'label':f, 'value':f} for f in feature_names]
+    cluster_features = data.features.values[0].split(';')
+    cluster_features = [c.strip() for c in cluster_features]
+    
+    extra_features = sorted([f['label'] for f in feature_selections if f['label'] not in cluster_features])
+
+    return [{'label':f,'value':f,'title':'Klusteroinnin avainluku'} for f in sorted(cluster_features) if f != 'value']+[{'label':f,'value':f,'title':'Muu avainluku'} for f in extra_features if f != 'value']
+
 
 
 @app.callback(
 
     Output('feature1', 'options'),
-    [Input('feature2', 'value')]
+    [Input('feature2', 'value'),
+    State('data_store','data')]
 
 )
-def update_feature1_dd(value):
+def update_feature1_dd(value, data):
     
-    feature_names = sorted([f['label'] for f in feature_selections if f['label'] != value])
-    return [{'label':f, 'value':f} for f in feature_names]
-        
+    cluster_features = data.features.values[0].split(';')
+    cluster_features = [c.strip() for c in cluster_features]
+    
+    extra_features = sorted([f['label'] for f in feature_selections if f['label'] not in cluster_features])
+    
+    return [{'label':f,'value':f,'title':'Klusteroinnin avainluku'} for f in sorted(cluster_features) if f != 'value']+[{'label':f,'value':f,'title':'Muu avainluku'} for f in extra_features if f != 'value']
+
 
 @app.callback(
     Output('cluster_and_extra_feature','children'),
-    [Input('cluster_button','n_clicks'),
-     State('data_store', 'data'),
-    State('features','value')]
+    [Input('data_store', 'data')]
 )
-def update_cluster_and_extra_feature(n_clicks, data, cluster_features):
+def update_cluster_and_extra_feature(data):
     
-    if n_clicks > 0:
+ 
         
-        extra_features = sorted([f['label'] for f in feature_selections if f['label'] not in cluster_features])
+    cluster_features = data.features.values[0].split(';')
+    cluster_features = [c.strip() for c in cluster_features]
         
-        extra_features = {True:cluster_features, False: extra_features}[len(extra_features) == 0]
+    extra_features = sorted([f['label'] for f in feature_selections if f['label'] not in cluster_features])
+        
+    extra_features = {True:cluster_features, False: extra_features}[len(extra_features) == 0]
     
-        return [dbc.Col(
+    return [dbc.Col(
                         children=[
                               html.H3('Tarkastele klustereita valitun klusterointikriteerin mukaan.',style={'textAlign':'center',
                                                                                                            'font-size':28}),
@@ -1752,7 +1775,6 @@ def plot_feature_graph(data,suomi, single_feature):
 @app.callback(
     Output('extra_feature_graph_div','children'),
     [Input('data_store','data'),
-     #Input('country_store','data'),
      Input('fin_store','data'),
      Input('extra_feature','value')]
 )
@@ -1766,35 +1788,28 @@ def plot_extra_feature_graph(data,suomi,extra_feature):
 
 
 @app.callback(
-    Output('count_plot', 'figure'),
+    Output('count_plot_div', 'children'),
     [Input('data_store','data')]
 )
 def plot_count_graph(data):
-    if data is not None:
-        return plot_counts(data)
-
-
-
-
-
-@app.callback(
-    Output('metrics', 'children'),
-   
-    [Input('data_store','data')]
-)
-def update_metrics_label(data):
-
+    
     inertia = data.inertia.values[0]
     silhouette = data.silhouette.values[0]
-    
-    return [html.A('Inertia', href = 'https://www.codecademy.com/learn/machine-learning/modules/dspath-clustering/cheatsheet', target="_blank",style = {'font-size':18, 'font-family':'Arial'}),
+       
+    return [dcc.Graph(id='count_plot',figure=plot_counts(data)),
+            html.P('Jos kuvaaja ei näy kunnolla, klikkaa uudestaan klusterointipainiketta.', 
+                                       style = {'font-size':18, 'font-family':'Arial'}),
+             html.P('Tämä kuvaaja havainnollistaa kuinka paljon alueita on jokaisessa klusterissa.',
+                                          style = {'font-size':18, 'font-family':'Arial'}),
+             html.P('Klusteroinnista on myös laskettu inertia, -ja siluettisuureet. Lisätietoa saa alla olevista linkeistä sekä "Ohje ja esittely" -välilehdellä.',
+                                              style = {'font-size':18, 'font-family':'Arial'}),
+             html.Br(),
+             html.A('Inertia', href = 'https://www.codecademy.com/learn/machine-learning/modules/dspath-clustering/cheatsheet', target="_blank",style = {'font-size':18, 'font-family':'Arial'}),
             ': ',
             inertia,
             ', ',
-            html.A('Silhouette', href = 'https://towardsdatascience.com/silhouette-coefficient-validating-clustering-techniques-e976bb81d10c', target="_blank",style = {'font-size':18, 'font-family':'Arial'}),': ',silhouette]
-    
-
-
+            html.A('Siluetti', href = 'https://towardsdatascience.com/silhouette-coefficient-validating-clustering-techniques-e976bb81d10c', target="_blank",style = {'font-size':18, 'font-family':'Arial'}),': ',silhouette
+           ]
 
 
 @app.callback(
