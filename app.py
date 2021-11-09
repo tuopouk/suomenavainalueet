@@ -752,7 +752,7 @@ def cluster_data(n_clusters, data, features):
 # def test_clusters_with_PCA(data, features):
     
 #     X = StandardScaler().fit_transform(data[features])
-#     pca = PCA(n_components=len(features))
+#     pca = PCA(n_components = .95, random_state = 42))
 #     principalComponents = pca.fit_transform(X)
 #     PCA_components = pd.DataFrame(principalComponents)
 
@@ -767,23 +767,16 @@ def cluster_data_with_PCA(n_clusters, data, features):
     x = data[features]
 
     X = scl.fit_transform(x)
-    
-    
-    # Pääkomponentteja ei voi olla enemmän kuin alueita.
-    try:
-        pca = PCA(n_components = len(features), random_state = 42, svd_solver = 'auto')
-        principalComponents = pca.fit_transform(X)
-    except:
-        pca = PCA(n_components = min(len(data), len(features)), random_state = 42, svd_solver = 'auto')
-        principalComponents = pca.fit_transform(X)
 
-    
+    # 95 % selitetty varianssi
+    pca = PCA(n_components = .95, random_state = 42)
+    principalComponents = pca.fit_transform(X)
     
     PCA_components = pd.DataFrame(principalComponents)
-
+    
     kmeans = KMeans(n_clusters, random_state = 42)
         
-    preds = kmeans.fit_predict(PCA_components.iloc[:,:2])
+    preds = kmeans.fit_predict(PCA_components)
 
     clusters = preds + 1 
     
@@ -1104,7 +1097,7 @@ max_clusters = {'Kunta':len(kunnat_data),
 initial_features = [f['label'] for f in feature_selections if 'yö' in f['label']]
 
 
-initial_n_clusters = 4
+initial_n_clusters = 5
 
 
 def serve_layout():
@@ -1289,7 +1282,8 @@ def serve_layout():
                                html.Br(),
                                html.H4('Pääkomponenttianalyysista',style={'textAlign':'center'}),
                                html.Br(),
-                               html.P('Pääkomponenttianalyysi (englanniksi Principal Component Analysis, PCA) on muuttujien redusointitekniikka. Sen tavoitteena on löytää moniulotteisesta datasta ne komponentit, joiden avulla sen keskeisimmät piirteet voidaan esittää ilman, että merkittävää informaatiota menetetään. Tässä sovelluksessa PCA paketoi käytetyt avainluvut kahteen pääkomponenttiin, jotka tiivistävät käytetyn informaation. Tämä on käytännöllinen toimenpide erityisesti silloin, kun klusterointia tehdään perustuen moneen avainlukuun. PCA:lla voi siten poistaa niitä muuttujia, jotka aiheuttavat datassa kohinaa. PCA:n haittapuoli on kuitenkin se, että pääkomponentteja ei pysty palauttamaan takaisin alkuperäisiin muuttujiin, jolloin menetetään tarkka tieto siitä mitä muuttujia klusteroinnissa lopulta hyödynnettiin. PCA soveltuu käytettäväksi esimerkiksi silloin kun on valittu useita klusterointimuuttujia eikä olla varmoja mitä kaikkia muuttujia pitäisi sisällyttää klusterointiin. Pienellä määrällä tarkasti harkittuja muuttujia PCA ei ole välttämätön.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                               html.P('Pääkomponenttianalyysilla (englanniksi Principal Component Analysis, PCA) pyritään minimoimaan käytettyjen muuttujien määrää pakkaamalla ne sellaisiin kokonaisuuksiin, jotta hyödynnetty informaatio säilyy. Informaation säilyvyyttä mitataan selitetyllä varianssilla (eng. explained variance), joka tarkoittaa uusista pääkomponenteista luodun datan hajonnan säilyvyyttä alkuperäiseen dataan verrattuna. Tässä sovelluksessa hyödynnetään 95% selitettyä varianssia. Näin saatu pääkomponenttijoukko on siten pienin sellainen joukko, joka säilyttää 95% alkuperäisen datan hajonnasta.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                              html.P('PCA on yleisesti hyödyllinen toimenpide silloin, kun valittuja klusterointimuuttujia on paljon, milloin on myös mahdollista, että osa valituista muuttujista aiheuttaa datassa kohinaa, mikä taas johtaa heikompaan klusterijakoon. Sillä voi myös nopeuttaa klusterointia, koska muuttujien määrä laskee. Pääkomponenttianalyysistä on kuitenkin hyvä pitä mielessä, että pääkomponentteja ei pysty palauttamaan alkuperäisiin muuttujiin. Pienellä määrällä tarkasti harkittuja muuttujia PCA ei ole välttämätön.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
                                html.Br(),
                                html.H4('Klusterit ja sijainnit',style={'textAlign':'center'}),
                                html.Br(),
@@ -1538,7 +1532,6 @@ def perform_clustering(n_clicks,area, n_clusters, features, pca):
     if n_clicks > 0:
         
         data = data_dict[area]
-        
         
         data = {True: cluster_data_with_PCA(n_clusters, data, features),
                 False: cluster_data(n_clusters, data, features)
