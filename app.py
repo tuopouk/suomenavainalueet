@@ -719,6 +719,7 @@ def cluster_data(n_clusters, data, features):
     data['silhouette'] = silhouette
     data['features'] = '; '.join(features)
     data['pca'] = False
+    data['components'] = len(features)
         
     color_df = colors.sample(len(colors)).copy()
     color_df.index = np.arange(len(colors))+1
@@ -774,6 +775,8 @@ def cluster_data_with_PCA(n_clusters, data, features):
     
     PCA_components = pd.DataFrame(principalComponents)
     
+    n_pca_components = len(PCA_components.columns)
+    
     kmeans = KMeans(n_clusters, random_state = 42)
         
     preds = kmeans.fit_predict(PCA_components)
@@ -788,6 +791,7 @@ def cluster_data_with_PCA(n_clusters, data, features):
     data['silhouette'] = silhouette
     data['features'] = '; '.join(features)
     data['pca'] = True
+    data['components'] = n_pca_components
         
     color_df = colors.sample(len(colors)).copy()
     color_df.index = np.arange(len(colors))+1
@@ -836,7 +840,7 @@ def get_baseline(data, koko_maa):
     suomi.yksikkö = suomi.yksikkö.str.replace('Työpaikkaomavaraisuus', 'tpo')
     suomi.yksikkö = suomi.yksikkö.str.replace('Väkiluku', 'henkilöä')
     
-    suomi['ka'] = data.drop(['Aluejako','inertia', 'silhouette', 'features', 'cluster','color'],axis=1).mean()
+    suomi['ka'] = data.drop(['cluster','inertia','silhouette','pca','components'], axis = 1).mean()
     suomi['arvo'] = suomi.apply(lambda row: choose_value(row['KOKO MAA'], row['ka'], row['yksikkö']),axis = 1)
 
     suomi['label'] = suomi.apply(lambda row: label_value(row['KOKO MAA'], row['arvo']),axis = 1)
@@ -1287,7 +1291,7 @@ def serve_layout():
                                html.Br(),
                                html.H4('Klusterit ja sijainnit',style={'textAlign':'center'}),
                                html.Br(),
-                               html.P('Klusterit ja sijainnit -välilehdellä käyttäjä voi tarkastella klustereiden kokoja (eli niiden sisältämien alueiden määrää) sekä niiden alueellista jakautumista. Tämä auttaa myös klustereiden määrän määrittelyssä, mikäli halutaan mahdollisimman tasaisesti jakautuneita klustereita. Pylväskuvion alle ilmestyy myös klusteroinnin inertia -ja siluettipisteet. Ne ovat indikaattoreita, jotka kuvaavat klustereiden jakautumista. Parhaassa tapauksessa klusterit sisältävät samanlaisia jäseniä, ja klusterit ovat kaukana toisistaan. Inertia kuvaa vain edellistä, kun taas siluetti kuvaa kokonaisuutta. Inertialle ei ole viitearvoa, mutta pienemmät arvot kertovat paremmasta klusterin sisäisestä jaosta. Siluetti saa arvoja -1 ja 1 väliltä. Teoriassa lähempänä ykköstä oleva siluettiarvo kuvaa hyvää klusterijakoa ja lähellä nollaa olevat arvot indikoivat samanlaisia klustereita. Käytännössä kuitenkin saavutettavat arvot riippuvat alkuperäisestä aineistosta, eikä ole viitearvoja siitä mikä on paras mahdollinen siluettiarvo, joka voidaan muodostaa ko. aineisto klusteroimalla. Tämänkin indikaattorin muutosta käyttäjä voi tarkastella klusterointiasetuksia muuttamalla.',style = {'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                               html.P('Klusterit ja sijainnit -välilehdellä käyttäjä voi tarkastella klustereiden kokoja (eli niiden sisältämien alueiden määrää) sekä niiden alueellista jakautumista. Tämä auttaa myös klustereiden määrän määrittelyssä, mikäli halutaan mahdollisimman tasaisesti jakautuneita klustereita. Mikäli käyttäjä on valinnut pääkomponenttianakyysin hyödyntämisen, tulostuu pylväskuvion alle ilmoitus pääkomponenttien määrästä. Pylväskuvion alle ilmestyy myös klusteroinnin inertia -ja siluettipisteet. Ne ovat indikaattoreita, jotka kuvaavat klustereiden jakautumista. Parhaassa tapauksessa klusterit sisältävät samanlaisia jäseniä, ja klusterit ovat kaukana toisistaan. Inertia kuvaa vain edellistä, kun taas siluetti kuvaa kokonaisuutta. Inertialle ei ole viitearvoa, mutta pienemmät arvot kertovat paremmasta klusterin sisäisestä jaosta. Siluetti saa arvoja -1 ja 1 väliltä. Teoriassa lähempänä ykköstä oleva siluettiarvo kuvaa hyvää klusterijakoa ja lähellä nollaa olevat arvot indikoivat samanlaisia klustereita. Käytännössä kuitenkin saavutettavat arvot riippuvat alkuperäisestä aineistosta, eikä ole viitearvoja siitä mikä on paras mahdollinen siluettiarvo, joka voidaan muodostaa ko. aineisto klusteroimalla. Tämänkin indikaattorin muutosta käyttäjä voi tarkastella klusterointiasetuksia muuttamalla.',style = {'textAlign':'center','font-family':'Arial', 'font-size':20}),
                                html.P('Klikkaamalla "Lataa karttanäkymä" -painiketta, voi klustereiden maantieteellistä jakautumista tarkastella kartalla. Kartta perustuu Mapboxin tarjoamiin avoimiin kartta-aineistoihin, johon on yhdistetty vuoden 2021 kunta-aluejako. Kartta saattaa latautua hitaasti erityisesti usean klusterin tapauksessa. Mikäli kartta ei ilmesty, kannattaa odottaa hetki ja kokeilla uudestaan. Lisäksi klusteroinnin tulokset voi viedä Excel-tiedostoon klikkaamalla "Lataa tiedosto koneelle" -nappia. Tiedostoon tulostuu kuntien avainluvut klustereittain sekä klusteroinnin metatiedot (valitut muuttujat, klustereiden määrä, aluetasosekä laatuindikaattorit).',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
                                html.Br(),
                                html.H4('Avainluvut klustereittain', style = {'text-align':'center'}),
@@ -1788,12 +1792,19 @@ def plot_count_graph(data):
     
     inertia = data.inertia.values[0]
     silhouette = data.silhouette.values[0]
+    pca = data.pca.values[0]
+    components = data.components.values[0]
+    
+    cluster_text = {True:'Klusteroinnissa hyödynnettiin pääkomponenttianalyysiä, jolloin pääkomponentteja muodostui 95% selitetyllä varianssilla yhteensä {} kappaletta.'.format(components),
+            False:'Klusterointi tehtiin ilman pääkomponenttianalyysiä, jolloin klusteroinnissa hyödynnettyjä muuttujia oli yhteensä {} kappaletta.'.format(components)
+           }[pca]
        
     return [dcc.Graph(id='count_plot',figure=plot_counts(data)),
             html.P('Jos kuvaaja ei näy kunnolla, klikkaa uudestaan klusterointipainiketta.', 
                                        style = {'font-size':18, 'font-family':'Arial'}),
              html.P('Tämä kuvaaja havainnollistaa kuinka paljon alueita on jokaisessa klusterissa.',
                                           style = {'font-size':18, 'font-family':'Arial'}),
+             html.P(cluster_text, style = {'font-size':18, 'font-family':'Arial'}),
              html.P('Klusteroinnista on myös laskettu inertia, -ja siluettisuureet. Lisätietoa saa alla olevista linkeistä sekä "Ohje ja esittely" -välilehdellä.',
                                               style = {'font-size':18, 'font-family':'Arial'}),
              html.Br(),
@@ -1859,15 +1870,17 @@ def download(n_clicks, data):
         silhouette = data.silhouette.values[0]
         aluejako = data.Aluejako.values[0]
         features = data.features.values[0].split(';')
+        components = data.components.values[0]
         features = '\n'.join([str(count+1)+': '+value.strip()+' ' for count, value in enumerate(features)])
         n_clusters = len(pd.unique(data.cluster))
         pca = data.pca.values[0]
-        data.drop(['color','Aluejako','silhouette','inertia','features','pca'],axis=1,inplace=True)
+        data.drop(['color','Aluejako','silhouette','inertia','features','pca','components'],axis=1,inplace=True)
         data.columns = data.columns.str.replace('cluster','Klusteri')
         
         metadata = pd.DataFrame([{'Aluejako':aluejako,
                                   'Klusterit':n_clusters,
-                                  'Pääkomponenttianlyysi':{True:'Kyllä',False:'Ei'}[pca],
+                                  'Pääkomponenttianalyysi':{True:'Kyllä',False:'Ei'}[pca],
+                                  'Klusteroinnissa käytetyt komponentit': components,
                                  'Klusteroinnin avainluvut':features,
                                  'Siluetti':silhouette,
                                  'Inertia':inertia}]).T.reset_index()
