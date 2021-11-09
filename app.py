@@ -1804,7 +1804,7 @@ def plot_count_graph(data):
                                        style = {'font-size':18, 'font-family':'Arial'}),
              html.P('Tämä kuvaaja havainnollistaa kuinka paljon alueita on jokaisessa klusterissa.',
                                           style = {'font-size':18, 'font-family':'Arial'}),
-             html.P(cluster_text, style = {'font-size':18, 'font-family':'Arial'}),
+             html.P(cluster_text.replace('1 kappaletta', 'yksi kappale'), style = {'font-size':18, 'font-family':'Arial'}),
              html.P('Klusteroinnista on myös laskettu inertia, -ja siluettisuureet. Lisätietoa saa alla olevista linkeistä sekä "Ohje ja esittely" -välilehdellä.',
                                               style = {'font-size':18, 'font-family':'Arial'}),
              html.Br(),
