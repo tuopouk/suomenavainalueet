@@ -712,7 +712,7 @@ def cluster_data(n_clusters, data, features):
     clusters = preds + 1 
     
     inertia = round(kmeans.inertia_,1)
-    silhouette = round(silhouette_score(x, preds),1)
+    silhouette = round(silhouette_score(X, preds),1)
 
     data['cluster'] = clusters
     data['inertia'] = inertia
@@ -784,7 +784,7 @@ def cluster_data_with_PCA(n_clusters, data, features):
     clusters = preds + 1 
     
     inertia = round(kmeans.inertia_,1)
-    silhouette = round(silhouette_score(x, preds),1)
+    silhouette = round(silhouette_score(X, preds),2)
 
     data['cluster'] = clusters
     data['inertia'] = inertia
@@ -1286,7 +1286,7 @@ def serve_layout():
                                html.Br(),
                                html.H4('Pääkomponenttianalyysista',style={'textAlign':'center'}),
                                html.Br(),
-                               html.P('Pääkomponenttianalyysilla (englanniksi Principal Component Analysis, PCA) pyritään minimoimaan käytettyjen muuttujien määrää pakkaamalla ne sellaisiin kokonaisuuksiin, jotta hyödynnetty informaatio säilyy. Informaation säilyvyyttä mitataan selitetyllä varianssilla (eng. explained variance), joka tarkoittaa uusista pääkomponenteista luodun datan hajonnan säilyvyyttä alkuperäiseen dataan verrattuna. Tässä sovelluksessa hyödynnetään 95% selitettyä varianssia. Näin saatu pääkomponenttijoukko on siten pienin sellainen joukko, joka säilyttää 95% alkuperäisen datan hajonnasta.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                               html.P('Pääkomponenttianalyysilla (englanniksi Principal Component Analysis, PCA) pyritään minimoimaan käytettyjen muuttujien määrää pakkaamalla ne sellaisiin kokonaisuuksiin, jotta hyödynnetty informaatio säilyy. Informaation säilyvyyttä mitataan selitetyllä varianssilla (eng. explained variance), joka tarkoittaa uusista pääkomponenteista luodun datan hajonnan säilyvyyttä alkuperäiseen dataan verrattuna. Tässä sovelluksessa hyödynnetään tilastotieteessä yleisimmin käytettyä 95% selitettyä varianssia. Näin saatu pääkomponenttijoukko on siten pienin sellainen joukko, joka säilyttää 95% alkuperäisen datan hajonnasta.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
                               html.P('PCA on yleisesti hyödyllinen toimenpide silloin, kun valittuja klusterointimuuttujia on paljon, milloin on myös mahdollista, että osa valituista muuttujista aiheuttaa datassa kohinaa, mikä taas johtaa heikompaan klusterijakoon. Sillä voi myös nopeuttaa klusterointia, koska muuttujien määrä laskee. Pääkomponenttianalyysistä on kuitenkin hyvä pitä mielessä, että pääkomponentteja ei pysty palauttamaan alkuperäisiin muuttujiin. Pienellä määrällä tarkasti harkittuja muuttujia PCA ei ole välttämätön.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
                                html.Br(),
                                html.H4('Klusterit ja sijainnit',style={'textAlign':'center'}),
@@ -1528,8 +1528,7 @@ def update_buttons(n_clicks):
     State('area', 'value'),
     State('n_clusters', 'value'),
     State('features','value'),
-    State('pca_switch','on')],
-    memoize=True
+    State('pca_switch','on')]
 )
 def perform_clustering(n_clicks,area, n_clusters, features, pca):
     
