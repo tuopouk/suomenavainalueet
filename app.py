@@ -888,7 +888,7 @@ def plot_feature(suomi, data, single_feature):
                          name = clusters_dict[i], 
                          legendrank=int(i),
                          textposition = 'auto',
-                     hovertemplate = ('<b>Klusteri </b><b>'+str(i)+'</b>:'+'<br>'+single_feature+': '+'{:,}'.format(np.round(gd[i].values[0],1)).replace('.0','').replace(',',' ')+''+unit+'<br>Klusterin koko: '+str(n_clusters.loc[str(i)])+' '+aluejako.lower().replace('ta','taa')+', '+str(value_counts[str(i)])+' kuntaa').replace(str(value_counts[str(i)])+' kuntaa'+', '+str(value_counts[str(i)])+' kuntaa',str(value_counts[str(i)])+' kuntaa').replace(' 1 kuntaa',' yksi kunta').replace(' 1 maakuntaa',' yksi maakunta').replace(' 1 seutukuntaa',' yksi seutukunta'),
+                     hovertemplate = ('<b>Klusteri </b><b>'+str(i)+'</b>:'+'<br>'+single_feature+': '+'{:,}'.format(np.round(gd[i].values[0],1)).replace('.0','').replace(',',' ')+' '+unit+'<br>Klusterin koko: '+str(n_clusters.loc[str(i)])+' '+aluejako.lower().replace('ta','taa')+', '+str(value_counts[str(i)])+' kuntaa').replace(str(value_counts[str(i)])+' kuntaa'+', '+str(value_counts[str(i)])+' kuntaa',str(value_counts[str(i)])+' kuntaa').replace(' 1 kuntaa',' yksi kunta').replace(' 1 maakuntaa',' yksi maakunta').replace(' 1 seutukuntaa',' yksi seutukunta'),
                          textfont = dict(family='Arial Black', size = 18),
                          text = '{:,}'.format(np.round(gd.T.loc[i],1).values[0]).replace('.0','').replace(',',' ')+' '+unit+'<br>(N = '+str(n_clusters.loc[str(i)])+')</br>',
                          marker = dict(color = cluster_colors.loc[i])) for i in sorted(clusters_dict.keys())]
@@ -1797,6 +1797,7 @@ def plot_count_graph(data):
     silhouette = data.silhouette.values[0]
     pca = data.pca.values[0]
     components = data.components.values[0]
+    aluejako = data.Aluejako.values[0]
     
     cluster_text = {True:'Klusteroinnissa hyödynnettiin pääkomponenttianalyysiä, jolloin pääkomponentteja muodostui 95% selitetyllä varianssilla yhteensä {} kappaletta.'.format(components),
             False:'Klusterointi tehtiin ilman pääkomponenttianalyysiä, jolloin klusteroinnissa hyödynnettyjä muuttujia oli yhteensä {} kappaletta.'.format(components)
@@ -1805,7 +1806,7 @@ def plot_count_graph(data):
     return [dcc.Graph(id='count_plot',figure=plot_counts(data)),
             html.P('Jos kuvaaja ei näy kunnolla, klikkaa uudestaan klusterointipainiketta.', 
                                        style = {'font-size':18, 'font-family':'Arial'}),
-             html.P('Tämä kuvaaja havainnollistaa kuinka paljon alueita on jokaisessa klusterissa.',
+             html.P('Tämä kuvaaja havainnollistaa kuinka paljon {} on jokaisessa klusterissa.'.format(aluejako.lower().replace('kunta','kuntia')),
                                           style = {'font-size':18, 'font-family':'Arial'}),
              html.P(cluster_text.replace(' 1 kappaletta', ' yksi kappale'), style = {'font-size':18, 'font-family':'Arial'}),
              html.P('Klusteroinnista on myös laskettu inertia, -ja siluettisuureet. Lisätietoa saa alla olevista linkeistä sekä "Ohje ja esittely" -välilehdellä.',
