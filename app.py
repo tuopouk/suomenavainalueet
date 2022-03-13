@@ -634,7 +634,7 @@ app = Dash(name = __name__,
           )
 
 
-app.title = 'Suomen avainklusterit'
+app.title = 'Suomen avainalueet'
 
 
 
@@ -1109,7 +1109,7 @@ def serve_layout():
     return html.Div(children = [
         
                html.Br(),
-               html.H1('Suomen avainklusterit',style={'textAlign':'center', 'font-size':60}),
+               html.H1('Suomen avainalueet',style={'textAlign':'center', 'font-size':60}),
                html.Br(),
               
                html.H3('klusterointityökalu',style={'textAlign':'center', 'font-size':30}),
@@ -1269,11 +1269,11 @@ def serve_layout():
                           dbc.Col(xs =10, sm=8, md=5, lg=6, xl=6, children =[
                        
                                html.Br(),
-                               html.P('Avainluvuista avainklustereihin', style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                               html.P('Avainluvuista avainalueisiin', style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
                                html.Br(),
                                html.H4('Johdanto',style={'textAlign':'center'}),
                                html.Br(),
-                               html.P('Tässä sovelluksessa voidaan jakaa Suomen kunnat, seutukunnat tai maakunnat avainklustereihin itse valittujen kuntien avainlukujen mukaan. Kuntien avainluvut ovat Tilastokeskuksen ylläpitämä data-aineisto, joka sisältää alueita koskevia tunnuslukuja. Tämä sovellus pyrkiikin täydentämään Kuntien avainluvut -palvelua mahdollistamalla kuntien, seutukuntien tai maakuntien ryhmittelyn (eli klusteroinnin) käyttäjän tarpeen mukaisilla indikaattoreilla. Klusterointi ei perustu alueiden maantieteelliseen sijaintiin vain ainoastaan alueiden avainlukuihin. Klusteroinnilla pyritään abstrahoimaan dataa suurempiin kokonaisuuksiin, joita ihmisten on helpompi käsitellä ja hallita. Klusterointi perustuu koneoppimiseen, jota sovelletaan ryhmittelysääntöjen muodostamisessa, minkä tekeminen manuaalisesti olisi (erityisesti usean muuttujan tapauksessa) hyvin vaikeaa. Tässä sovelluksessa pyritäänkin siis löytämään, koneoppimista hyödyntäen, uusia aluekokonaisuuksia tilastollisen datan avulla. ',style={'textAlign':'center','font-family':'Arial', 'font-size':20}), 
+                               html.P('Tässä sovelluksessa voidaan jakaa Suomen kunnat, seutukunnat tai maakunnat tilastollisesti merkittäviin avainalueisiin itse valittujen kuntien avainlukujen mukaan. Kuntien avainluvut ovat Tilastokeskuksen ylläpitämä data-aineisto, joka sisältää alueita koskevia tunnuslukuja. Tämä sovellus pyrkiikin täydentämään Kuntien avainluvut -palvelua mahdollistamalla kuntien, seutukuntien tai maakuntien ryhmittelyn (eli klusteroinnin) käyttäjän tarpeen mukaisilla indikaattoreilla. Klusterointi ei perustu alueiden maantieteelliseen sijaintiin vain ainoastaan alueiden avainlukuihin. Klusteroinnilla pyritään abstrahoimaan dataa suurempiin kokonaisuuksiin, joita ihmisten on helpompi käsitellä ja hallita. Klusterointi perustuu koneoppimiseen, jota sovelletaan ryhmittelysääntöjen muodostamisessa, minkä tekeminen manuaalisesti olisi (erityisesti usean muuttujan tapauksessa) hyvin vaikeaa. Tässä sovelluksessa pyritäänkin siis löytämään, koneoppimista hyödyntäen, uusia aluekokonaisuuksia tilastollisen datan avulla. ',style={'textAlign':'center','font-family':'Arial', 'font-size':20}), 
                                html.P('Käyttäjä voi valita avainlukujen ja aluetason lisäksi myös haluttujen klustereiden määrän. Klustereiden määrän valintaan ei ole oikeaa tai väärää vastausta. Haluttua määrää lieneekin hyvä tarkastella käyttäjän substanssin kautta. Jos on esimerkiksi tarkoitus perustaa tietty määrä aluekehitystyöryhmiä, on mahdollista valita klustereita tuo samainen määrä. Käyttäjä voi myös kokeilla eri lähtöarvoja klustereiden muodostamiseksi. Klusterointi perustuu tässä sovelluksessa ohjaamattomaan koneoppimiseen perustuvaan K-Means -klusterointiin, missä K on valittujen klustereiden määrä. Sivun alalaidasta löytyy linkki Wikipedia-artikkeliin K-Means -klusteroinnista.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
                                html.Br(),
                                html.H4('Ohje',style={'textAlign':'center'}),
@@ -1321,6 +1321,10 @@ def serve_layout():
                                             html.A('Paikkatietoaineistot', href = "https://www.tilastokeskus.fi/org/avoindata/paikkatietoaineistot.html",target="_blank")
                                            ],style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
                                    html.Br(),
+                                   html.Label(['Tilastokeskus: ', 
+                                            html.A('Käsitteet ja määritelmät', href = "https://www.stat.fi/meta/kas/index.html",target="_blank")
+                                           ],style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                                   html.Br(),
                                    html.Label(['Wikipedia: ', 
                                             html.A('K-Means -klusterointi (englanniksi)', href = "https://en.wikipedia.org/wiki/K-means_clustering",target="_blank")
                                            ],style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
@@ -1358,7 +1362,7 @@ def serve_layout():
                                    html.Br(),
                                    html.Br(),
                                    html.Label(['Sovellus ', 
-                                            html.A('GitHub:ssa', href='https://github.com/tuopouk/suomenavainklusterit')
+                                            html.A('GitHub:ssa', href='https://github.com/tuopouk/suomenavainalueet')
                                            ],style={'textAlign':'center','font-family':'Arial', 'font-size':20})
                                ])
                           ])
@@ -1803,7 +1807,7 @@ def plot_count_graph(data):
                                        style = {'font-size':18, 'font-family':'Arial'}),
              html.P('Tämä kuvaaja havainnollistaa kuinka paljon alueita on jokaisessa klusterissa.',
                                           style = {'font-size':18, 'font-family':'Arial'}),
-             html.P(cluster_text.replace('1 kappaletta', 'yksi kappale'), style = {'font-size':18, 'font-family':'Arial'}),
+             html.P(cluster_text.replace(' 1 kappaletta', ' yksi kappale'), style = {'font-size':18, 'font-family':'Arial'}),
              html.P('Klusteroinnista on myös laskettu inertia, -ja siluettisuureet. Lisätietoa saa alla olevista linkeistä sekä "Ohje ja esittely" -välilehdellä.',
                                               style = {'font-size':18, 'font-family':'Arial'}),
              html.Br(),
