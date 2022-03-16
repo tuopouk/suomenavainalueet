@@ -6,4 +6,4 @@ Sovelluksessa käytettävät kartta-aineistot on muodostettu Tilastokeskuksen ai
 
 Värit on skrapattu Wikipediasta.
 
-Sovellus löytyy osoitteesta http://suomenavainklusterit.herokuapp.com/
+Sovellus löytyy osoitteesta http://suomenavainalueet.herokuapp.com/
