@@ -26,6 +26,7 @@ import time
 from datetime import datetime
 import io
 
+in_dev = False
 
 # Käytetyt värit.
 # https://en.wikipedia.org/wiki/List_of_colors:_A%E2%80%93F
@@ -770,8 +771,18 @@ def cluster_data_with_PCA(n_clusters, data, features):
     X = scl.fit_transform(x)
 
     # 95 % selitetty varianssi
-    pca = PCA(n_components = .95, random_state = 42)
+    
+    explained_variance = .95
+    
+    pca = PCA(n_components = explained_variance, random_state = 42)
     principalComponents = pca.fit_transform(X)
+    
+    # Debuggaus variaation tarkastelua varten.
+    
+#     from plotly.offline import plot
+#     x_plot = [str(c) for c in np.arange(1, pca.n_components_+1)]
+#     y_plot = pca.explained_variance_ratio_
+#     plot(go.Figure(data=[go.Bar(x=x_plot,y=y_plot)],layout=go.Layout()))
     
     PCA_components = pd.DataFrame(principalComponents)
     
@@ -1137,7 +1148,7 @@ def serve_layout():
                                               on = False, 
                                               color = 'blue') 
 
-                    ],xs =10, sm=8, md=5, lg=6, xl=6, align = 'center'),
+                    ],xs =12, sm=12, md=12, lg=6, xl=6, align = 'center'),
                 
                   
                    
@@ -1176,7 +1187,7 @@ def serve_layout():
                        html.Br(),
                        html.Div(id = 'slider_update', children = [html.P('Valitsit {} klusteria.'.format(initial_n_clusters),style = {'textAlign':'center', 'fontSize':24, 'fontFamily':'Arial Black'})]),
                        html.Br(),
-                   ],xs =10, sm=8, md=5, lg=6, xl=6)
+                   ],xs =12, sm=12, md=12, lg=6, xl=6)
                 ], style = {'margin' : '10px 10px 10px 10px'}),
         
         # 4. rivi
@@ -1227,7 +1238,7 @@ def serve_layout():
 
                         
                         html.Br(),
-                        dbc.Row(id = 'cluster_and_extra_feature', style = {'margin' : '10px 10px 10px 10px'})
+                        dbc.Row(id = 'cluster_and_extra_feature',justify = 'center', style = {'margin' : '10px 10px 10px 10px'})
                 
             ]),
             dbc.Tab(label = 'Klustereiden tarkastelu kahden avainluvun mukaan',
@@ -1238,7 +1249,7 @@ def serve_layout():
                        
                         html.Br(),
                         html.Br(),
-                        dbc.Row(id = 'correlations', style = {'margin' : '10px 10px 10px 10px'})
+                        dbc.Row(id = 'correlations', justify = 'center', style = {'margin' : '10px 10px 10px 10px'})
                 
             ]),
 #             dbc.Tab(label = 'Klustereiden määrän arviointi',
@@ -1521,7 +1532,7 @@ def update_buttons(n_clicks):
                            color = 'danger'
                            ),            
                 
-               ],xs =10, sm=8, md=5, lg=6, xl=7
+               ],xs =12, sm=12, md=12, lg=6, xl=6
                       )]
 
 @app.callback(
@@ -1568,11 +1579,11 @@ def update_count_and_map(n_clicks):
                                 html.Div(id = 'count_plot_div'),
 
                             ],
-                        xs =12, sm=12, md=6, lg=6, xl=6, align = 'center'),
+                        xs =12, sm=12, md=12, lg=6, xl=6, align = 'center'),
                      dbc.Col(
                              children=[
                               dcc.Loading(children=[html.Div(id = 'map_div')], type = spinners[random.randint(0,len(spinners)-1)])
-                             ],xs =12, sm=12, md=6, lg=6, xl=6)
+                             ],xs =12, sm=12, md=12, lg=6, xl=6)
                ]
  
 
@@ -1728,7 +1739,7 @@ def update_cluster_and_extra_feature(data):
                               html.Div(id = 'feature_graph_div')
                              
 
-                        ],xs =12, sm=2, md=6, lg=6, xl=6),
+                        ],xs =12, sm=12, md=12, lg=6, xl=6),
                  dbc.Col(
                          children=[
                               html.H3('Tarkastele klustereita muun avainluvun mukaan.',style={'textAlign':'center',
@@ -1750,7 +1761,7 @@ def update_cluster_and_extra_feature(data):
                                           multi = False),
                               html.Br(),
                               html.Div(id = 'extra_feature_graph_div')
-                         ],xs =12, sm=12, md=6, lg=6, xl=6)
+                         ],xs =12, sm=12, md=12, lg=6, xl=6)
                ]
              
 
@@ -1928,4 +1939,4 @@ def update_feature_list(on):
  
 app.layout = serve_layout
 if __name__ == "__main__":
-    app.run_server(debug=False,threaded=True)
+    app.run_server(debug=in_dev,threaded=True)
