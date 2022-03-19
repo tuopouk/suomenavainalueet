@@ -851,7 +851,7 @@ def get_baseline(data, koko_maa):
     
     suomi = pd.DataFrame(koko_maa)
     suomi['yksikkö'] = [c.split(',')[-2].strip().split()[0] if len(c.split(',')[-2].strip().split())==1 or 'huoltosuhde' in c.split(',')[-2].strip().split() else '' for c in suomi.index]
-    suomi.yksikkö = suomi.yksikkö.str.replace('Taloudellinen', '%')
+    suomi.yksikkö = suomi.yksikkö.str.replace('Taloudellinen', '')
     suomi.yksikkö = suomi.yksikkö.str.replace('Työpaikkaomavaraisuus', 'tpo')
     suomi.yksikkö = suomi.yksikkö.str.replace('Väkiluku', 'henkilöä')
     
