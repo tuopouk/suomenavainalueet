@@ -629,8 +629,8 @@ server.secret_key = os.environ.get('secret_key','secret')
 app = Dash(name = __name__, 
            prevent_initial_callbacks = False, 
            server = server,
-           meta_tags = [{'name':'viewport',
-                        'content':'width=device-width, initial_scale=1.0, maximum_scale=1.2, minimum_scale=0.5'}],
+        #   meta_tags = [{'name':'viewport',
+         #               'content':'width=device-width, initial_scale=1.0, maximum_scale=1.2, minimum_scale=0.5'}],
            external_stylesheets = external_stylesheets
           )
 
@@ -1736,7 +1736,8 @@ def update_cluster_and_extra_feature(data):
                                      options = [{'label':f,'value':f,'title':'Klusteroinnin avainluku'} for f in sorted(cluster_features)],
                                      multi = False),
                               html.Br(),
-                              html.Div(id = 'feature_graph_div')
+                              html.Div(id = 'feature_graph_div'),
+                              html.Br(),
                              
 
                         ],xs =12, sm=12, md=12, lg=6, xl=6),
@@ -1760,7 +1761,8 @@ def update_cluster_and_extra_feature(data):
                                      options =  [{'label':f,'value':f,'title':'Muu avainluku'} for f in extra_features],
                                           multi = False),
                               html.Br(),
-                              html.Div(id = 'extra_feature_graph_div')
+                              html.Div(id = 'extra_feature_graph_div'),
+                              html.Br()
                          ],xs =12, sm=12, md=12, lg=6, xl=6)
                ]
              
