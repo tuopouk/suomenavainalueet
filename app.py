@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import requests
 import plotly.graph_objs as go
+from plotly.io.json import to_json_plotly
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
@@ -25,6 +26,7 @@ from sklearn.metrics import silhouette_score
 import time
 from datetime import datetime
 import io
+import json
 
 in_dev = False
 
@@ -738,7 +740,7 @@ def cluster_data(n_clusters, data, features):
     data.cluster = data.cluster.astype(str)
     
     data = data.set_index('Alue')
-    
+   
 
     return data
 
@@ -845,6 +847,8 @@ def label_value(value, primary):
 # ja suhteellisista suureista käytetään valmista koko maan arvoa.
 def get_baseline(data, koko_maa):
     
+    
+    
     suomi = pd.DataFrame(koko_maa)
     suomi['yksikkö'] = [c.split(',')[-2].strip().split()[0] if len(c.split(',')[-2].strip().split())==1 or 'huoltosuhde' in c.split(',')[-2].strip().split() else '' for c in suomi.index]
     suomi.yksikkö = suomi.yksikkö.str.replace('Taloudellinen', '%')
@@ -864,17 +868,19 @@ def get_baseline(data, koko_maa):
 
 def plot_feature(suomi, data, single_feature):
     
-    aluejako = data.Aluejako.values[0]
+    data_ = data.copy()
+    
+    aluejako = data_.Aluejako.values[0]
     kuntamäärät = kuntamäärät_alueittain[aluejako]
     
-    value_counts = pd.merge(left = data, right = kuntamäärät, left_on = data.index, right_on = kuntamäärät.index, how = 'inner').groupby('cluster').Kunta.sum()
+    value_counts = pd.merge(left = data_, right = kuntamäärät, left_on = data_.index, right_on = kuntamäärät.index, how = 'inner').groupby('cluster').Kunta.sum()
     
     
-    grouped_data = data.groupby(['cluster','color']).mean().reset_index().set_index('cluster')
+    grouped_data = data_.groupby(['cluster','color']).mean().reset_index().set_index('cluster')
     grouped_data.index = grouped_data.index.astype(int)
     grouped_data= grouped_data.sort_index()
     
-    aluejako = data.Aluejako.values[0].lower()
+    aluejako = data_.Aluejako.values[0].lower()
     
     koko_maa_values = [suomi.loc[single_feature].arvo for i in range(len(grouped_data))]
     koko_maa_ka = koko_maa_values[0]
@@ -883,7 +889,7 @@ def plot_feature(suomi, data, single_feature):
     unit = suomi.loc[single_feature].yksikkö
     label = suomi.loc[single_feature].label
     
-    n_clusters = data['cluster'].value_counts().sort_index()
+    n_clusters = data_['cluster'].value_counts().sort_index()
     n_clusters.index = n_clusters.index.astype(str)
     
     gd = grouped_data[[single_feature]].reset_index()
@@ -944,9 +950,9 @@ def plot_feature(suomi, data, single_feature):
 
 def plot_counts(data):
     
+    data_ = data.copy()
     
-    
-    cdf = data.groupby(['cluster','color']).count().iloc[:,0].reset_index()
+    cdf = data_.groupby(['cluster','color']).count().iloc[:,0].reset_index()
     cdf.columns = ['cluster','color','n_clusters']
     cdf = cdf.set_index('cluster')
     cdf.index = cdf.index.astype(int)
@@ -954,10 +960,10 @@ def plot_counts(data):
     cdf.index = cdf.index.astype(str)
     
     
-    aluejako = data.Aluejako.values[0]
+    aluejako = data_.Aluejako.values[0]
     kuntamäärät = kuntamäärät_alueittain[aluejako]
     
-    value_counts = pd.merge(left = data, right = kuntamäärät, left_on = data.index, right_on = kuntamäärät.index, how = 'inner').groupby('cluster').Kunta.sum()
+    value_counts = pd.merge(left = data_, right = kuntamäärät, left_on = data_.index, right_on = kuntamäärät.index, how = 'inner').groupby('cluster').Kunta.sum()
 
 
 
@@ -994,17 +1000,23 @@ def plot_counts(data):
     
     return figure
 
+def plot_empty_map():
+    
+    return px.choropleth_mapbox(center = {"lat": 64.961093, "lon": 27.590605})
+
 
 def plot_map(data, geojson, aluetaso):
     
-    data.cluster = data.cluster.astype(int)
-    data = data.sort_values(by='cluster')
-    data.cluster = data.cluster.astype(str)
-    color_discrete_map = data[['cluster','color']].drop_duplicates().set_index('cluster').to_dict()['color']
+    data_ = data.copy()
+    
+    data_.cluster = data_.cluster.astype(int)
+    data_ = data_.sort_values(by='cluster')
+    data_.cluster = data_.cluster.astype(str)
+    color_discrete_map = data_[['cluster','color']].drop_duplicates().set_index('cluster').to_dict()['color']
     
     
 
-    fig = px.choropleth_mapbox(data[['cluster','color']].reset_index(), 
+    fig = px.choropleth_mapbox(data_[['cluster','color']].reset_index(), 
                                geojson=geojson, 
                                locations='Alue', 
                                color='cluster',
@@ -1021,19 +1033,19 @@ def plot_map(data, geojson, aluetaso):
                       hoverlabel = dict(font_size = 16, font_family = 'Arial'),
                       legend = dict(title = '<b>Klusterit</b>', font=dict(size=18)),
                       )
-    
+
     
     return fig
 
-
 def plot_correlations(data, suomi, feature1, feature2):
     
+    data_ = data.copy()
     
-    cdf = data.groupby(['cluster','color']).count().iloc[:,0].reset_index()
+    cdf = data_.groupby(['cluster','color']).count().iloc[:,0].reset_index()
     cdf.columns = ['cluster','color','n_clusters']
     cdf = cdf.set_index('cluster')
 
-    d = data[['cluster',feature1,feature2]].sort_values(by='cluster').groupby('cluster').mean()
+    d = data_[['cluster',feature1,feature2]].sort_values(by='cluster').groupby('cluster').mean()
     d.index = d.index.astype(int)
     d = d.sort_index()
     d.index = d.index.astype(str)
@@ -1041,7 +1053,7 @@ def plot_correlations(data, suomi, feature1, feature2):
     aluejako = data.Aluejako.values[0]
     kuntamäärät = kuntamäärät_alueittain[aluejako]
     
-    value_counts = pd.merge(left = data, right = kuntamäärät, left_on = data.index, right_on = kuntamäärät.index, how = 'inner').groupby('cluster').Kunta.sum()
+    value_counts = pd.merge(left = data_, right = kuntamäärät, left_on = data_.index, right_on = kuntamäärät.index, how = 'inner').groupby('cluster').Kunta.sum()
 
     
     max_size = 60
@@ -1055,7 +1067,7 @@ def plot_correlations(data, suomi, feature1, feature2):
                      mode = 'markers+text', 
                      hovertemplate = ('<b>Klusteri </b><b>'+c+'</b>:'+'<br>'+feature1+': {:,}'.format(round(d.loc[c][feature1],1)).replace('.0','').replace(',',' ')+' '+suomi.loc[feature1].yksikkö+'<br>'+feature2+': {:,}'.format(round(d.loc[c][feature2],1)).replace('.0','').replace(',',' ')+' '+suomi.loc[feature2].yksikkö+'<br>Klusterin koko: '+(str(cdf.loc[c].n_clusters)+' '+aluejako.lower().replace('ta','taa')+', '+str(value_counts[c])+' kuntaa')).replace(str(value_counts[c])+' kuntaa'+', '+str(value_counts[c])+' kuntaa',str(value_counts[c])+' kuntaa').replace(' 1 kuntaa',' yksi kunta').replace(' 1 maakuntaa',' yksi maakunta').replace(' 1 seutukuntaa',' yksi seutukunta'),
                      marker_size = value_counts[c], 
-                     marker = dict(sizemode='area',opacity=.8, sizeref=2*value_counts.max()/ max_size**2, line_width=2, color = data[data.cluster==c].color.values[0])) for c in d.index]
+                     marker = dict(sizemode='area',opacity=.8, sizeref=2*value_counts.max()/ max_size**2, line_width=2, color = data_[data_.cluster==c].color.values[0])) for c in d.index]
     
     
     traces.append(go.Scatter(x = np.array([suomi.loc[feature1].arvo]), 
@@ -1071,7 +1083,7 @@ def plot_correlations(data, suomi, feature1, feature2):
        
         
     title_text = {True: '<b>'+feature1+'</b><br>vs.</br><b>'+feature2+'</b><br></br>',
-                 False: '<b>'+feature1+'</b> vs. <b>'+feature2+'</b><br></br>'}[len(feature1) + len(feature2) > 50]    
+                 False: '<b>'+feature1+'</b> vs. <b>'+feature2+'</b><br></br>'}[len(feature1) + len(feature2) > 70]    
         
     fig = go.Figure(data=traces, 
                 layout=go.Layout(#width=1000,
@@ -1177,11 +1189,18 @@ def serve_layout():
                                  value = initial_n_clusters,
                                  step = 1,
                                  marks = {2: {'label':'2', 'style':{'font-size':20, 'fontFamily':'Arial Black','color':'white'}},
-                                          5:{'label':'5', 'style':{'font-size':20, 'fontFamily':'Arial Black','color':'white'}},
-                                          8:{'label':'8', 'style':{'font-size':20, 'fontFamily':'Arial Black','color':'white'}}
+                                          3: {'label':'3', 'style':{'font-size':20, 'fontFamily':'Arial Black','color':'white'}},
+                                          4:{'label':'4', 'style':{'font-size':20, 'fontFamily':'Arial Black','color':'white'}},
+                                          5: {'label':'5', 'style':{'font-size':20, 'fontFamily':'Arial Black','color':'white'}},
+                                          6:{'label':'6', 'style':{'font-size':20, 'fontFamily':'Arial Black','color':'white'}},
+                                          7: {'label':'6', 'style':{'font-size':20, 'fontFamily':'Arial Black','color':'white'}},
+                                          8:{'label':'8', 'style':{'font-size':20, 'fontFamily':'Arial Black','color':'white'}},
                                          # 10:{'label':'10', 'style':{'font-size':20, 'fontFamily':'Arial Black','color':'white'}}
-                                         # 12:{'label':'12', 'style':{'font-size':20, 'fontFamily':'Arial Black'}},
-                                         # 15:{'label':'15', 'style':{'font-size':20, 'fontFamily':'Arial Black'}}
+#                                           12:{'label':'12', 'style':{'font-size':20, 'fontFamily':'Arial Black','color':'white'}},
+#                                           14:{'label':'14', 'style':{'font-size':20, 'fontFamily':'Arial Black','color':'white'}},
+#                                           16:{'label':'16', 'style':{'font-size':20, 'fontFamily':'Arial Black','color':'white'}},
+#                                           18:{'label':'18', 'style':{'font-size':20, 'fontFamily':'Arial Black','color':'white'}},
+#                                           20:{'label':'20', 'style':{'font-size':20, 'fontFamily':'Arial Black','color':'white'}}
                                           }
                                  ),
                        html.Br(),
@@ -1393,6 +1412,8 @@ def serve_layout():
                   children= [
                             dcc.Store(id='data_store'),
                             dcc.Store(id='fin_store'),
+#                             dcc.Store(id = 'map_data_store'),
+#                             dcc.Store(id = 'map_layout_store'),
                             dcc.Download(id = "download-component")
                            ]
                  )
@@ -1537,7 +1558,9 @@ def update_buttons(n_clicks):
 
 @app.callback(
     [ServersideOutput('data_store','data'), 
-     ServersideOutput('fin_store','data')
+     ServersideOutput('fin_store','data'),
+#      Output('map_data_store','data'),
+#      Output('map_layout_store','data')
     ],
     [Input('cluster_button','n_clicks'),
     State('area', 'value'),
@@ -1559,11 +1582,18 @@ def perform_clustering(n_clicks,area, n_clusters, features, pca):
         
         suomi = get_baseline(data, koko_maa)
         
-        return data, suomi
+#         geojson = geojson_map[area]
+        
+#         map_figure = plot_map(data, geojson, area)
+        
+#         map_data = orjson.loads(to_json_plotly(map_figure))['data']
+#         map_layout = orjson.loads(to_json_plotly(map_figure))['layout']
+
+        return data, suomi#, map_data, map_layout 
 
         
         
-
+        
 
 @app.callback(
     Output('count_and_map','children'),
@@ -1843,26 +1873,53 @@ def plot_cluster_map(n_clicks, data):
     
     if n_clicks > 0:
         
+        
                 
         area = data.Aluejako.values[0]
         
         
 
         geojson = geojson_map[area]
-                
+        
+ 
+        # cluster_map = plot_empty_map()        
         cluster_map = plot_map(data, geojson, area)
+       
+        
+        
 
 
         return html.Div(children =[html.H3('Klusterit {}'.format(area.lower()).replace('kunta','kunnittain'), style ={'textAlign': 'center','fontSize':40, 'family':'Arial Black'}),html.Br(),
                                    dcc.Graph(id = 'cluster_map', figure = cluster_map),
                                    html.P('Jos kartta ei näy, kokeile toisella selaimella.',
-                                          style={'font-size':20,'font-family':'Arial'}),
+                                         style={'font-size':20,'font-family':'Arial'}),
                                   html.P('Kartassa näkyy värikoodattuna mihin klusteriin kukin '+area.lower()+' kuuluu. Selitteestä voit kaksoisklikkaamalla valita yhden klusterin, johon kuuluvat alueet haluat näyttää kartalla. Voit myös yhdellä klikkauksella valita mitä klustereita näytetään. Karttaa voi liikuttaa hiiren vasemmalla napilla. Oikealla napilla pystyy kiertämään karttaa. Oikeasta yläkulmasta selitteen yläpuolelta löytyy valintatyökalut, joista voi myös tallentaa kartan kuvana.',
                                         style = {'font-size':20,'font-family':'Arial'}),
 
                                   ])
         
+# app.clientside_callback(
 
+#     """
+#     function(data, layout){
+    
+#         return {
+#             'data':data,
+#             'layout':layout
+#         }
+    
+    
+#     }
+    
+    
+#     """,
+#     Output('cluster_map', 'figure'),
+#     [Input('map_data_store','data'),
+#     Input('map_layout_store','data')]
+
+
+# )
+        
 @app.callback(
     Output('slider_update','children'),
     [Input('n_clusters', 'value')]
