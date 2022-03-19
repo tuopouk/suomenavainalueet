@@ -1071,7 +1071,7 @@ def plot_correlations(data, suomi, feature1, feature2):
        
         
     title_text = {True: '<b>'+feature1+'</b><br>vs.</br><b>'+feature2+'</b><br></br>',
-                 False: '<b>'+feature1+'</b> vs. <b>'+feature2+'</b><br></br>'}[len(feature1) + len(feature2) > 100]    
+                 False: '<b>'+feature1+'</b> vs. <b>'+feature2+'</b><br></br>'}[len(feature1) + len(feature2) > 50]    
         
     fig = go.Figure(data=traces, 
                 layout=go.Layout(#width=1000,
