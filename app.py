@@ -2027,12 +2027,14 @@ def download(n_clicks, data):
         features = '\n'.join([str(count+1)+': '+value.strip()+' ' for count, value in enumerate(features)])
         n_clusters = len(pd.unique(data.cluster))
         pca = data.pca.values[0]
-        data.drop(['color','Aluejako','silhouette','inertia','features','pca','components'],axis=1,inplace=True)
+        explained_variance = pd.DataFrame(data.explained_variance).fillna(0).values[0]
+        data.drop(['color','Aluejako','silhouette','inertia','features','pca','components','explained_variance'],axis=1,inplace=True)
         data.columns = data.columns.str.replace('cluster','Klusteri')
         
         metadata = pd.DataFrame([{'Aluejako':aluejako,
                                   'Klusterit':n_clusters,
                                   'Pääkomponenttianalyysi':{True:'Kyllä',False:'Ei'}[pca],
+                                  'Säilytetty variaatio PCA:ssa': {True: str(int(100*explained_variance))+'%',False:'Ei sovellettu'}[pca],
                                   'Klusteroinnissa käytetyt komponentit': components,
                                  'Klusteroinnin avainluvut':features,
                                  'Siluetti':silhouette,
