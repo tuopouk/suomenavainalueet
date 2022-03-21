@@ -722,6 +722,7 @@ def cluster_data(n_clusters, data, features):
     data['silhouette'] = silhouette
     data['features'] = '; '.join(features)
     data['pca'] = False
+    data['explained_variance'] = np.nan
     data['components'] = len(features)
         
     color_df = colors.sample(len(colors)).copy()
@@ -763,7 +764,9 @@ def cluster_data(n_clusters, data, features):
 #     return pd.DataFrame([{'clusters':k, 'inertia':KMeans(n_clusters = k, random_state = 42).fit(PCA_components.iloc[:,:3]).inertia_} for k in range(2,11)])
 
 # Klusterointi PCA:lla
-def cluster_data_with_PCA(n_clusters, data, features):
+def cluster_data_with_PCA(n_clusters, data, features, explained_variance):
+    
+    
     
     scl = StandardScaler()
        
@@ -774,9 +777,9 @@ def cluster_data_with_PCA(n_clusters, data, features):
 
     # 95 % selitetty varianssi
     
-    explained_variance = .95
+    #explained_variance = .95
     
-    pca = PCA(n_components = explained_variance, random_state = 42)
+    pca = PCA(n_components = explained_variance, random_state = 42, svd_solver = 'full')
     principalComponents = pca.fit_transform(X)
     
     # Debuggaus variaation tarkastelua varten.
@@ -804,6 +807,7 @@ def cluster_data_with_PCA(n_clusters, data, features):
     data['silhouette'] = silhouette
     data['features'] = '; '.join(features)
     data['pca'] = True
+    data['explained_variance'] = explained_variance
     data['components'] = n_pca_components
         
     color_df = colors.sample(len(colors)).copy()
@@ -1121,7 +1125,7 @@ max_clusters = {'Kunta':len(kunnat_data),
                'Maakunta':len(maakunnat_data),
                'Seutukunta':len(seutukunnat_data)}
 
-initial_features = [f['label'] for f in feature_selections if 'yö' in f['label']]
+initial_features = [f['label'] for f in feature_selections if 'yö' in f['label'] and 'määrä' not in f['label']]
 
 
 initial_n_clusters = 5
@@ -1213,9 +1217,43 @@ def serve_layout():
         dbc.Row([dash_daq.BooleanSwitch(id = 'pca_switch', 
                                          label = dict(label = 'Käytä pääkomponenttianalyysia',style = {'font-size':20, 'fontFamily':'Arial Black'}), 
                                           on = False, 
-                                          color = 'blue')],
-               justify='center',align="start", style = {'margin' : '10px 10px 10px 10px'}),
-        html.Div([html.Br()]),
+                                          color = 'blue'),
+
+                ], justify='center',align="start", style = {'margin' : '10px 10px 10px 10px'}),
+        #html.Br(),
+        dbc.Row(id = 'ev_placeholder', 
+                     children = [dbc.Col(xs = 3, sm = 3, md = 3, lg = 4, xl = 4),
+                                 dbc.Col(xs = 6, sm = 6, md = 6, lg = 4, xl = 4,children = [
+                                     html.H4('Valitse säilytettävä variaatio.', style = {'textAlign':'center'}),
+                                     
+                                     dcc.Slider(id = 'ev_slider',
+                                            min = .7, 
+                                            max = .99, 
+                                            value = .95, 
+                                            step = .01,
+                                             marks = {
+                                                      .7: {'label':'70%', 'style':{'font-size':20, 'fontFamily':'Arial Black','color':'white'}},
+                                                 .85: {'label':'85%', 'style':{'font-size':20, 'fontFamily':'Arial Black','color':'white'}},
+                                                      .99: {'label':'99%', 'style':{'font-size':20, 'fontFamily':'Arial Black','color':'white'}}
+
+                                                     }
+                                           ),
+                                    html.Br(),
+                                 html.Div(id = 'ev_slider_update', 
+                                          children = [
+                                              html.Div([html.P('Valitsit {} % säilytetyn variaation.'.format(95),
+                                                               style = {'textAlign':'center', 'fontSize':20, 'fontFamily':'Arial Black'})
+                                                       ], style = {'display':'none'}
+                                                      )
+                                          ]
+                                        ),
+                                 ]),
+                                 
+                                 dbc.Col(xs = 3, sm = 3, md = 3, lg = 4, xl = 4)
+                                        
+                                ],
+                 style = {'margin' : '10px 10px 10px 10px', 'display':'none'}, justify = 'center'),
+        html.Br(),
         dbc.Row([
                        dbc.Button('Klusteroi',
                                   id='cluster_button',
@@ -1225,6 +1263,7 @@ def serve_layout():
                                   size='lg',
                                   color='success',
                                   style = dict(fontSize=28)
+                                  
                                   ),
             
 
@@ -1312,11 +1351,12 @@ def serve_layout():
                                html.P('2. Valitse haluttu aluetaso aluepainikkeista.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
                                html.P('3. Valitse klustereiden määrä vierittämällä valintapalkkia.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
                                html.P('4. Valitse kytkimellä käytetäänkö pääkomponenttianalyysiä. Asiaa on selitetty alla olevalla tekstillä.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
-                               html.P('5. Klusteroi klikkaamalla "Klusteroi" -painiketta.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
+                               html.P('5. Valitse kuinka suuri osuus alkuperäisen datan variaatiosta säilytetään pääkomponenttianalyysissä.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
+                               html.P('6. Klusteroi klikkaamalla "Klusteroi" -painiketta.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
                                html.Br(),
                                html.H4('Pääkomponenttianalyysista',style={'textAlign':'center'}),
                                html.Br(),
-                               html.P('Pääkomponenttianalyysilla (englanniksi Principal Component Analysis, PCA) pyritään minimoimaan käytettyjen muuttujien määrää pakkaamalla ne sellaisiin kokonaisuuksiin, jotta hyödynnetty informaatio säilyy. Informaation säilyvyyttä mitataan selitetyllä varianssilla (eng. explained variance), joka tarkoittaa uusista pääkomponenteista luodun datan hajonnan säilyvyyttä alkuperäiseen dataan verrattuna. Tässä sovelluksessa hyödynnetään tilastotieteessä yleisimmin käytettyä 95% selitettyä varianssia. Näin saatu pääkomponenttijoukko on siten pienin sellainen joukko, joka säilyttää 95% alkuperäisen datan hajonnasta.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                               html.P('Pääkomponenttianalyysilla (englanniksi Principal Component Analysis, PCA) pyritään minimoimaan käytettyjen muuttujien määrää pakkaamalla ne sellaisiin kokonaisuuksiin, jotta hyödynnetty informaatio säilyy. Informaation säilyvyyttä mitataan selitetyllä varianssilla (eng. explained variance), joka tarkoittaa uusista pääkomponenteista luodun datan hajonnan säilyvyyttä alkuperäiseen dataan verrattuna. Tässä sovelluksessa selitetyn varianssin (tai säilytetyn variaation) osuuden voi valita itse, mikäli hyödyntää PCA:ta. Näin saatu pääkomponenttijoukko on siten pienin sellainen joukko, joka säilyttää valitun osuuden alkuperäisen datan hajonnasta.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
                               html.P('PCA on yleisesti hyödyllinen toimenpide silloin, kun valittuja klusterointimuuttujia on paljon, milloin on myös mahdollista, että osa valituista muuttujista aiheuttaa datassa kohinaa, mikä taas johtaa heikompaan klusterijakoon. Sillä voi myös nopeuttaa klusterointia, koska muuttujien määrä laskee. Pääkomponenttianalyysistä on kuitenkin hyvä pitä mielessä, että pääkomponentteja ei pysty palauttamaan alkuperäisiin muuttujiin. Pienellä määrällä tarkasti harkittuja muuttujia PCA ei ole välttämätön.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
                                html.Br(),
                                html.H4('Klusterit ja sijainnit',style={'textAlign':'center'}),
@@ -1558,6 +1598,37 @@ def update_buttons(n_clicks):
                    ],xs =4, sm=4, md=4, lg=4, xl=4
                           ),
            dbc.Col(xs =4, sm=4, md=4, lg=4, xl=4)]
+    
+
+@app.callback(
+
+    Output('ev_placeholder', 'style'),
+    [Input('pca_switch', 'on')]
+)    
+def add_ev_slider(pca):
+    
+    return {False: {'margin' : '10px 10px 10px 10px', 'display':'none'},
+           True: {'margin' : '10px 10px 10px 10px'}}[pca]
+
+
+@app.callback(
+
+    Output('ev_slider_update', 'children'),
+    [Input('pca_switch', 'on'),
+    Input('ev_slider', 'value')]
+
+)
+def update_ev_indicator(pca, explained_variance):
+    
+    return {False: [html.Div([html.P('Valitsit {} % säilytetyn variaation.'.format(int(100*explained_variance)),
+                                                               style = {'textAlign':'center', 'fontSize':20, 'fontFamily':'Arial Black'})
+                                                       ], style = {'display':'none'}
+                                                      )],
+            True: [html.Div([html.P('Valitsit {} % säilytetyn variaation.'.format(int(100*explained_variance)),
+                                                               style = {'textAlign':'center', 'fontSize':20, 'fontFamily':'Arial Black'})
+                                                       ]
+                                                      )]}[pca]
+    
 
 @app.callback(
     [ServersideOutput('data_store','data'), 
@@ -1569,15 +1640,18 @@ def update_buttons(n_clicks):
     State('area', 'value'),
     State('n_clusters', 'value'),
     State('features','value'),
-    State('pca_switch','on')]
+    State('pca_switch','on'),
+    State('ev_slider', 'value')]
 )
-def perform_clustering(n_clicks,area, n_clusters, features, pca):
+def perform_clustering(n_clicks,area, n_clusters, features, pca, explained_variance):
+    
+    print(explained_variance)
     
     if n_clicks > 0:
         
         data = data_dict[area]
         
-        data = {True: cluster_data_with_PCA(n_clusters, data, features),
+        data = {True: cluster_data_with_PCA(n_clusters, data, features, explained_variance),
                 False: cluster_data(n_clusters, data, features)
                }[pca]
        
@@ -1692,8 +1766,7 @@ def update_correlations(data):
     Input('fin_store','data')]
 )
 def update_correlation_plot(feature1, feature2, data,  suomi):
-    
-    
+
     
     return dcc.Graph(id = 'correlation_plot', 
                      figure = plot_correlations(data, suomi, feature1, feature2)
@@ -1846,8 +1919,9 @@ def plot_count_graph(data):
     pca = data.pca.values[0]
     components = data.components.values[0]
     aluejako = data.Aluejako.values[0]
+    explained_variance = pd.DataFrame(data.explained_variance).fillna(0).values[0]
     
-    cluster_text = {True:'Klusteroinnissa hyödynnettiin pääkomponenttianalyysiä, jolloin pääkomponentteja muodostui 95% selitetyllä varianssilla yhteensä {} kappaletta.'.format(components),
+    cluster_text = {True:'Klusteroinnissa hyödynnettiin pääkomponenttianalyysiä, jolloin pääkomponentteja muodostui {}% selitetyllä varianssilla yhteensä {} kappaletta.'.format(int(100*explained_variance),components),
             False:'Klusterointi tehtiin ilman pääkomponenttianalyysiä, jolloin klusteroinnissa hyödynnettyjä muuttujia oli yhteensä {} kappaletta.'.format(components)
            }[pca]
        
