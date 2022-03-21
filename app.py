@@ -1536,7 +1536,7 @@ def update_buttons(n_clicks):
     
     #if n_clicks > 0:
         
-    return [dbc.Col(xs =12, sm=12, md=12, lg=4, xl=4),
+    return [dbc.Col(xs =4, sm=4, md=4, lg=4, xl=4),
             dbc.Col(children=[
 
                 dbc.Button(children=[html.I(className="fa fa-download mr-1"), 'Lataa tiedosto koneelle'],
@@ -1555,9 +1555,9 @@ def update_buttons(n_clicks):
                            color = 'danger'
                            ),            
                 
-               ],xs =12, sm=12, md=12, lg=4, xl=4
+               ],xs =4, sm=4, md=4, lg=4, xl=4
                       ),
-           dbc.Col(xs =12, sm=12, md=12, lg=4, xl=4)]
+           dbc.Col(xs =4, sm=4, md=4, lg=4, xl=4)]
 
 @app.callback(
     [ServersideOutput('data_store','data'), 
