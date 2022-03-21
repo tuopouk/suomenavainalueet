@@ -629,7 +629,7 @@ external_stylesheets = [dbc.themes.SUPERHERO,
 server = Flask(__name__)
 server.secret_key = os.environ.get('secret_key','secret')
 app = Dash(name = __name__, 
-           prevent_initial_callbacks = True, 
+           prevent_initial_callbacks = False, 
            server = server,
         #   meta_tags = [{'name':'viewport',
          #               'content':'width=device-width, initial_scale=1.0, maximum_scale=1.2, minimum_scale=0.5'}],
@@ -1534,29 +1534,29 @@ def update_switch_enabling(features):
 )
 def update_buttons(n_clicks):
     
-    #if n_clicks > 0:
+    if n_clicks > 0:
         
-    return [dbc.Col(xs =4, sm=4, md=4, lg=4, xl=4),
-            dbc.Col(children=[
+        return [dbc.Col(xs =4, sm=4, md=4, lg=4, xl=4),
+                dbc.Col(children=[
 
-                dbc.Button(children=[html.I(className="fa fa-download mr-1"), 'Lataa tiedosto koneelle'],
-                           id='download_button',
-                           n_clicks=0,
-                           outline=True,
-                           size = 'lg',
-                           color = 'info'
-                           ),
-                
-                dbc.Button('Lataa karttanäkymä',
-                           id='map_button',
-                           n_clicks=0,
-                           outline=True,
-                           size = 'lg',
-                           color = 'danger'
-                           ),            
-                
-               ],xs =4, sm=4, md=4, lg=4, xl=4
-                      ),
+                    dbc.Button(children=[html.I(className="fa fa-download mr-1"), 'Lataa tiedosto koneelle'],
+                               id='download_button',
+                               n_clicks=0,
+                               outline=True,
+                               size = 'lg',
+                               color = 'info'
+                               ),
+
+                    dbc.Button('Lataa karttanäkymä',
+                               id='map_button',
+                               n_clicks=0,
+                               outline=True,
+                               size = 'lg',
+                               color = 'danger'
+                               ),            
+
+                   ],xs =4, sm=4, md=4, lg=4, xl=4
+                          ),
            dbc.Col(xs =4, sm=4, md=4, lg=4, xl=4)]
 
 @app.callback(
@@ -1692,6 +1692,8 @@ def update_correlations(data):
     Input('fin_store','data')]
 )
 def update_correlation_plot(feature1, feature2, data,  suomi):
+    
+    
     
     return dcc.Graph(id = 'correlation_plot', 
                      figure = plot_correlations(data, suomi, feature1, feature2)
