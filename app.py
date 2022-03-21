@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 import requests
 import plotly.graph_objs as go
-from plotly.io.json import to_json_plotly
+#from plotly.io.json import to_json_plotly
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
