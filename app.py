@@ -629,7 +629,7 @@ external_stylesheets = [dbc.themes.SUPERHERO,
 server = Flask(__name__)
 server.secret_key = os.environ.get('secret_key','secret')
 app = Dash(name = __name__, 
-           prevent_initial_callbacks = False, 
+           prevent_initial_callbacks = True, 
            server = server,
         #   meta_tags = [{'name':'viewport',
          #               'content':'width=device-width, initial_scale=1.0, maximum_scale=1.2, minimum_scale=0.5'}],
@@ -1244,7 +1244,7 @@ def serve_layout():
 
                 
                 html.Br(),
-                dbc.Row(id = 'other_buttons',justify='end', style = {'margin' : '10px 10px 10px 10px'}),
+                dbc.Row(id = 'other_buttons',justify='center', style = {'margin' : '10px 10px 10px 10px'}),
                 html.Br(),
                 dbc.Row( id = 'count_and_map', style = {'margin' : '10px 10px 10px 10px'})
                 
@@ -1536,7 +1536,8 @@ def update_buttons(n_clicks):
     
     #if n_clicks > 0:
         
-    return [dbc.Col(children=[
+    return [dbc.Col(xs =12, sm=12, md=12, lg=4, xl=4),
+            dbc.Col(children=[
 
                 dbc.Button(children=[html.I(className="fa fa-download mr-1"), 'Lataa tiedosto koneelle'],
                            id='download_button',
@@ -1545,6 +1546,7 @@ def update_buttons(n_clicks):
                            size = 'lg',
                            color = 'info'
                            ),
+                
                 dbc.Button('Lataa karttanäkymä',
                            id='map_button',
                            n_clicks=0,
@@ -1553,8 +1555,9 @@ def update_buttons(n_clicks):
                            color = 'danger'
                            ),            
                 
-               ],xs =12, sm=12, md=12, lg=6, xl=6
-                      )]
+               ],xs =12, sm=12, md=12, lg=4, xl=4
+                      ),
+           dbc.Col(xs =12, sm=12, md=12, lg=4, xl=4)]
 
 @app.callback(
     [ServersideOutput('data_store','data'), 
@@ -1893,7 +1896,7 @@ def plot_cluster_map(n_clicks, data):
                                    dcc.Graph(id = 'cluster_map', figure = cluster_map),
                                    html.P('Jos kartta ei näy, kokeile toisella selaimella.',
                                          style={'font-size':20,'font-family':'Arial'}),
-                                  html.P('Kartassa näkyy värikoodattuna mihin klusteriin kukin '+area.lower()+' kuuluu. Selitteestä voit kaksoisklikkaamalla valita yhden klusterin, johon kuuluvat alueet haluat näyttää kartalla. Voit myös yhdellä klikkauksella valita mitä klustereita näytetään. Karttaa voi liikuttaa hiiren vasemmalla napilla. Oikealla napilla pystyy kiertämään karttaa. Oikeasta yläkulmasta selitteen yläpuolelta löytyy valintatyökalut, joista voi myös tallentaa kartan kuvana.',
+                                  html.P('Kartassa näkyy värikoodattuna mihin klusteriin kukin '+area.lower()+' kuuluu. Selitteestä voit kaksoisklikkaamalla valita yhden klusterin, johon kuuluvat alueet haluat näyttää kartalla. Voit myös yhdellä klikkauksella valita mitä klustereita näytetään tai piilotetaan. Karttaa voi liikuttaa hiiren vasemmalla napilla. Oikealla napilla pystyy kiertämään karttaa. Oikeasta yläkulmasta selitteen yläpuolelta löytyy valintatyökalut, joista voi myös tallentaa kartan kuvana.',
                                         style = {'font-size':20,'font-family':'Arial'}),
 
                                   ])
