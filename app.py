@@ -909,9 +909,9 @@ def plot_feature(suomi, data, single_feature):
                          name = clusters_dict[i], 
                          legendrank=int(i),
                          textposition = 'auto',
-                     hovertemplate = ('<b>Klusteri </b><b>'+str(i)+'</b>:'+'<br>'+single_feature+': '+'{:,}'.format(np.round(gd[i].values[0],2)).replace('.0','').replace(',',' ')+' '+unit+'<br>Klusterin koko: '+str(n_clusters.loc[str(i)])+' '+aluejako.lower().replace('ta','taa')+', '+str(value_counts[str(i)])+' kuntaa').replace(str(value_counts[str(i)])+' kuntaa'+', '+str(value_counts[str(i)])+' kuntaa',str(value_counts[str(i)])+' kuntaa').replace(' 1 kuntaa',' yksi kunta').replace(' 1 maakuntaa',' yksi maakunta').replace(' 1 seutukuntaa',' yksi seutukunta'),
+                     hovertemplate = ('<b>Klusteri </b><b>'+str(i)+'</b>:'+'<br>'+single_feature+': '+'{:,}'.format(np.round(gd[i].values[0],2)).replace('.00','').replace(',',' ')+' '+unit+'<br>Klusterin koko: '+str(n_clusters.loc[str(i)])+' '+aluejako.lower().replace('ta','taa')+', '+str(value_counts[str(i)])+' kuntaa').replace(str(value_counts[str(i)])+' kuntaa'+', '+str(value_counts[str(i)])+' kuntaa',str(value_counts[str(i)])+' kuntaa').replace(' 1 kuntaa',' yksi kunta').replace(' 1 maakuntaa',' yksi maakunta').replace(' 1 seutukuntaa',' yksi seutukunta'),
                          textfont = dict(family='Arial Black', size = 18),
-                         text = '{:,}'.format(np.round(gd.T.loc[i],2).values[0]).replace('.0','').replace(',',' ')+' '+unit+'<br>(N = '+str(n_clusters.loc[str(i)])+')</br>',
+                         text = '{:,}'.format(np.round(gd.T.loc[i],2).values[0]).replace('.00','').replace(',',' ')+' '+unit+'<br>(N = '+str(n_clusters.loc[str(i)])+')</br>',
                          marker = dict(color = cluster_colors.loc[i])) for i in sorted(clusters_dict.keys())]
 
     
@@ -1069,7 +1069,7 @@ def plot_correlations(data, suomi, feature1, feature2):
                      textposition='top center',
                      name = c, 
                      mode = 'markers+text', 
-                     hovertemplate = ('<b>Klusteri </b><b>'+c+'</b>:'+'<br>'+feature1+': {:,}'.format(round(d.loc[c][feature1],2)).replace('.0','').replace(',',' ')+' '+suomi.loc[feature1].yksikkö+'<br>'+feature2+': {:,}'.format(round(d.loc[c][feature2],2)).replace('.0','').replace(',',' ')+' '+suomi.loc[feature2].yksikkö+'<br>Klusterin koko: '+(str(cdf.loc[c].n_clusters)+' '+aluejako.lower().replace('ta','taa')+', '+str(value_counts[c])+' kuntaa')).replace(str(value_counts[c])+' kuntaa'+', '+str(value_counts[c])+' kuntaa',str(value_counts[c])+' kuntaa').replace(' 1 kuntaa',' yksi kunta').replace(' 1 maakuntaa',' yksi maakunta').replace(' 1 seutukuntaa',' yksi seutukunta'),
+                     hovertemplate = ('<b>Klusteri </b><b>'+c+'</b>:'+'<br>'+feature1+': {:,}'.format(round(d.loc[c][feature1],2)).replace('.00','').replace(',',' ')+' '+suomi.loc[feature1].yksikkö+'<br>'+feature2+': {:,}'.format(round(d.loc[c][feature2],2)).replace('.00','').replace(',',' ')+' '+suomi.loc[feature2].yksikkö+'<br>Klusterin koko: '+(str(cdf.loc[c].n_clusters)+' '+aluejako.lower().replace('ta','taa')+', '+str(value_counts[c])+' kuntaa')).replace(str(value_counts[c])+' kuntaa'+', '+str(value_counts[c])+' kuntaa',str(value_counts[c])+' kuntaa').replace(' 1 kuntaa',' yksi kunta').replace(' 1 maakuntaa',' yksi maakunta').replace(' 1 seutukuntaa',' yksi seutukunta'),
                      marker_size = value_counts[c], 
                      marker = dict(sizemode='area',opacity=.8, sizeref=2*value_counts.max()/ max_size**2, line_width=2, color = data_[data_.cluster==c].color.values[0])) for c in d.index]
     
@@ -1080,7 +1080,7 @@ def plot_correlations(data, suomi, feature1, feature2):
                          text='Koko maan<br>vertailukohta</br>',
                          textfont=dict(family="arial black",size=16,color="black"), 
                          mode = 'markers+text',                          
-                         hovertemplate = '<b>Koko maan vertailukohta</b>: <br>'+feature1+' ({})'.format(suomi.loc[feature1].label.lower()).replace(' (koko maa)','')+': {:,}'.format(round(suomi.loc[feature1].arvo,2)).replace('.0','').replace(',',' ')+''+suomi.loc[feature1].yksikkö+'<br>'+feature2+' ({})'.format(suomi.loc[feature2].label.lower()).replace(' (koko maa)','')+': {:,}'.format(round(suomi.loc[feature2].arvo,2)).replace('.0','').replace(',',' ')+' '+suomi.loc[feature2].yksikkö,                            
+                         hovertemplate = '<b>Koko maan vertailukohta</b>: <br>'+feature1+' ({})'.format(suomi.loc[feature1].label.lower()).replace(' (koko maa)','')+': {:,}'.format(round(suomi.loc[feature1].arvo,2)).replace('.00','').replace(',',' ')+''+suomi.loc[feature1].yksikkö+'<br>'+feature2+' ({})'.format(suomi.loc[feature2].label.lower()).replace(' (koko maa)','')+': {:,}'.format(round(suomi.loc[feature2].arvo,2)).replace('.00','').replace(',',' ')+' '+suomi.loc[feature2].yksikkö,                            
                          marker = dict(size=max_size,color='black',opacity=.2,sizemode='area',sizeref=2*value_counts.max()/ max_size**2,line_width=2), 
                          marker_symbol='pentagon-dot'))
 
