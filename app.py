@@ -1076,10 +1076,11 @@ def plot_correlations(data, suomi, feature1, feature2):
     
     traces.append(go.Scatter(x = np.array([suomi.loc[feature1].arvo]), 
                          y = np.array([suomi.loc[feature2].arvo]), 
-                         name = 'Koko maan vertailukohta', 
+                         name = '', 
                          text='Koko maan<br>vertailukohta</br>',
                          textfont=dict(family="arial black",size=16,color="black"), 
-                         mode = 'markers+text',                          
+                         mode = 'markers+text',    
+                         showlegend=False,
                          hovertemplate = '<b>Koko maan vertailukohta</b>: <br>'+feature1+' ({})'.format(suomi.loc[feature1].label.lower()).replace(' (koko maa)','')+': {:,}'.format(round(suomi.loc[feature1].arvo,2)).replace('.00','').replace(',',' ')+''+suomi.loc[feature1].yksikkö+'<br>'+feature2+' ({})'.format(suomi.loc[feature2].label.lower()).replace(' (koko maa)','')+': {:,}'.format(round(suomi.loc[feature2].arvo,2)).replace('.00','').replace(',',' ')+' '+suomi.loc[feature2].yksikkö,                            
                          marker = dict(size=max_size,color='black',opacity=.2,sizemode='area',sizeref=2*value_counts.max()/ max_size**2,line_width=2), 
                          marker_symbol='pentagon-dot'))
@@ -1107,6 +1108,80 @@ def plot_correlations(data, suomi, feature1, feature2):
     
     return fig
 
+
+def plot_inner_correlations(data, suomi, feature1, feature2, clusters):
+    
+    data_ = data.copy()
+
+    data_ = data_[data.cluster.astype(str).isin([str(c) for c in clusters])]
+
+
+    d = data_[['cluster','color',feature1,feature2]]
+
+    traces = []
+    
+    for c in sorted(clusters):
+        
+        d_ = d[d.cluster == str(c)]
+        color = d_.color.values[0]
+        not_shown = True
+        for alue in pd.unique(d_.index):
+        
+            traces.append(go.Scatter(x = [d_.loc[alue,feature1]], 
+                             y = [d_.loc[alue,feature2]], 
+                             name = str(c), 
+                             legendgroup = str(c),
+                             mode = 'text', 
+                             text = alue,
+                                 textfont=dict(
+                                            family="Arial",
+                                            size=20,
+                                            color=color
+                                        ),
+                             showlegend=not_shown,
+                             hovertemplate = ['<b>'+alue+'</b><br>'+feature1+': '+'{:,}'.format(d_.loc[alue,feature1]).replace(',',' ')+' '+suomi.loc[feature1].yksikkö+'<br>'+feature2+': '+ '{:,}'.format(d_.loc[alue,feature2]).replace(',',' ')+' '+suomi.loc[feature2].yksikkö]
+                                    )
+                         )
+            not_shown = False
+
+    
+    traces.append(go.Scatter(x = np.array([suomi.loc[feature1].arvo]), 
+                         y = np.array([suomi.loc[feature2].arvo]), 
+                         name = '', 
+                         text='Koko maan<br>vertailukohta</br>',
+                         textfont=dict(family="arial black",size=16,color="black"), 
+                         mode = 'markers+text', 
+                         showlegend=False,
+                         hovertemplate = ['<b>Koko maan vertailukohta</b>: <br>'+feature1+' ({})'.format(suomi.loc[feature1].label.lower()).replace(' (koko maa)','')+': {:,}'.format(round(suomi.loc[feature1].arvo,2)).replace('.00','').replace(',',' ')+' '+suomi.loc[feature1].yksikkö+'<br>'+feature2+' ({})'.format(suomi.loc[feature2].label.lower()).replace(' (koko maa)','')+': {:,}'.format(round(suomi.loc[feature2].arvo,2)).replace('.00','').replace(',',' ')+' '+suomi.loc[feature2].yksikkö],                            
+                         marker = dict(size=60,
+                                       color='black',
+                                       opacity=.2,
+                                       sizemode='area',
+                                       line_width=2), 
+                         marker_symbol='pentagon-dot'))
+
+
+    
+    title_text = {True: '<b>'+feature1+'</b><br>vs.</br><b>'+feature2+'</b><br></br>',
+                 False: '<b>'+feature1+'</b> vs. <b>'+feature2+'</b><br></br>'}[len(feature1) + len(feature2) > 70]    
+    
+    fig = go.Figure(data=traces, 
+                layout=go.Layout(
+                                 height=1000,
+                                 template = 'plotly_white',
+                                 hoverlabel = dict(font_size = 16, font_family = 'Arial'),
+                                 xaxis=dict(title = dict(text=feature1, font=dict(size=18, family = 'Arial Black')), tickformat = ' ', tickfont = dict(size=14)), 
+                                 yaxis=dict(title = dict(text=feature2, font=dict(size=18, family = 'Arial Black')), tickformat = ' ', tickfont = dict(size=14)),
+                                 title = dict(text = title_text, x=.5, font=dict(size=24,family = 'Arial')),
+                                 legend = dict(title = '<b>Klusterit</b>',font=dict(size=18))
+                                            
+                                )
+               )
+    
+    fig.update_xaxes(showspikes=True)
+    fig.update_yaxes(showspikes=True)
+    
+    return fig
 
 
 
@@ -1299,7 +1374,7 @@ def serve_layout():
                         dbc.Row(id = 'cluster_and_extra_feature',justify = 'center', style = {'margin' : '10px 10px 10px 10px'})
                 
             ]),
-            dbc.Tab(label = 'Klustereiden tarkastelu kahden avainluvun mukaan',
+            dbc.Tab(label = 'Klusterit kahden avainluvun mukaan',
                     tabClassName="flex-grow-1 text-center",
                     tab_style = {'font-size':28},
                     children = [
@@ -1308,6 +1383,17 @@ def serve_layout():
                         html.Br(),
                         html.Br(),
                         dbc.Row(id = 'correlations', justify = 'center', style = {'margin' : '10px 10px 10px 10px'})
+                
+            ]),
+            dbc.Tab(label = 'Avainluvut klustereissa',
+                    tabClassName="flex-grow-1 text-center",
+                    tab_style = {'font-size':28},
+                    children = [
+
+                       
+                        html.Br(),
+                        html.Br(),
+                        dbc.Row(id = 'inner_correlations', justify = 'center', style = {'margin' : '10px 10px 10px 10px'})
                 
             ]),
 #             dbc.Tab(label = 'Klustereiden määrän arviointi',
@@ -1368,9 +1454,13 @@ def serve_layout():
                                html.Br(),
                                html.P('Avainluvut klustereittain -lehdellä voi tarkastella klustereiden eroja valittujen avainlukujen suhteen. Pylväskuvioiden avulla pystyy havainnoimaan avinlukujen klusterikohtaisia keskiarvoja sekä miten ne suhtautuvat koko maan viitearvoon. Koko maan arvo on suhteellisissa luvuissa (esim. työllisyysaste) Tilastokeskuksen ilmoittama viitearvo, ja määrällisissä luvuissa (esim. väkiluku) alueiden keskiarvo. Pylväitä voi tarkastella sekä klusteroinnissa käytettyjen avainlukujen että klusteroinnin ulkopuolisten avainlukujen mukaan. Ensimmäinen kuvaaja indikoi enemmän klustereiden profiloinnista kun taas toinen kuvaaja pyrkii kuvaamaan mitä muita lisäpiirteitä klustereiden välille muodostui.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
                                html.Br(),
-                               html.H4('Klustereiden tarkastelu kahden avainluvun mukaan.',style={'textAlign':'center'}),
+                               html.H4('Klusterit kahden avainluvun mukaan',style={'textAlign':'center'}),
                                html.Br(),
                                html.P('Klustereita voi tarkastella myös kahden avainluvun mukaan sille varatulla välilehdellä. Näin pystytään tarkastelemaan avainlukujen välisiä korrelaatioita klustereittain sekä profiloimaan klustereita paremmin.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                               html.Br(),
+                               html.H4('Avainluvut klustereissa',style={'textAlign':'center'}),
+                               html.Br(),
+                               html.P('Tässä osiossa on mahdollista porautua tekemään edeltävän osion analyysiä klustereiden sisältämien alueiden näkökulmasta. Näin voidaan havainnoida kuinka yksittäisen klusterin sisäiset alueet suhtautuvat toisiinsa ja hajautuvat kahden avainluvun perusteella. Lisäksi on myös mahdollista tarkastella klustereiden välisiä päällekäisyyksiä ja eroavaisuuksia. ',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
                                html.Br(),
                                html.H4('Vastuuvapauslauseke',style={'textAlign':'center'}),
                                html.Br(),
@@ -1469,6 +1559,17 @@ def serve_layout():
 
 )
 def update_alert(features):
+    
+    return len(features) == 0
+
+
+@app.callback(
+
+    Output('cluster_alert', 'is_open'),
+    [Input('cluster_dropdown','value')]
+
+)
+def update_cluster_alert(features):
     
     return len(features) == 0
 
@@ -1645,7 +1746,7 @@ def update_ev_indicator(pca, explained_variance):
 )
 def perform_clustering(n_clicks,area, n_clusters, features, pca, explained_variance):
     
-    print(explained_variance)
+    
     
     if n_clicks > 0:
         
@@ -1757,6 +1858,86 @@ def update_correlations(data):
                              
                    ]
 
+
+@app.callback(
+    Output('inner_correlations', 'children'),
+    [Input('data_store', 'data')]
+)
+def update_inner_correlations(data):
+    
+    cluster_features = data.features.values[0].split(';')
+            
+    cluster_features = [c.strip() for c in cluster_features]
+    
+    extra_features = sorted([f['label'] for f in feature_selections if f['label'] not in cluster_features])
+
+    options = [{'label':f,'value':f,'title':'Klusteroinnin avainluku'} for f in sorted(cluster_features) if f != 'value']+[{'label':f,'value':f,'title':'Muu avainluku'} for f in extra_features if f != 'value']
+            
+    value1 = cluster_features[np.random.randint(len(cluster_features))]
+    cluster_features.remove(value1)
+    value2 = cluster_features[np.random.randint(len(cluster_features))]
+    
+    clusters = sorted(pd.unique(data.cluster))
+    cluster_options = [{'label':str(c), 'value':str(c)} for c in clusters]
+
+    return [
+                     dbc.Col(
+                            children=[
+                                html.Br(),
+                                html.Br(),
+                                html.H3('Valitse ensimmäinen avainluku'),
+                                html.Br(),
+                                dcc.Dropdown(id = 'inner_feature1',
+                                           
+                                            options = options, 
+                                            value = value1,
+                                            multi = False,
+                                            placeholder = 'Valitse ensimmäinen avainluku.',
+                                             style = {'font-size':16, 'font-family':'Arial','color': 'black'}
+                                            ),
+                                html.Br(),
+                                html.H3('Valitse toinen avainluku'),
+                                html.Br(),
+                                dcc.Dropdown(id = 'inner_feature2',
+                                            options = options,
+                                            value = value2,
+                                            multi = False,
+                                            placeholder = 'Valitse toinen avainluku.',
+                                             style = {'font-size':16, 'font-family':'Arial','color': 'black'}
+                                            ),
+                                html.Br(),
+                                html.H3('Valitse klusterit'),
+                                html.Br(),
+                                dcc.Dropdown(id = 'cluster_dropdown',
+                                            options = cluster_options,
+                                            value = ['1'],
+                                            multi = True,
+                                            clearable=False,
+                                            placeholder = 'Valitse klusteri.',
+                                             style = {'font-size':16, 'font-family':'Arial','color': 'black'}
+                                            ),
+                               dbc.Alert("Valitse ainakin yksi klusteri valikosta!", color="danger",
+                                 dismissable=True, fade = True, is_open=False, id = 'cluster_alert', 
+                                 style = {'text-align':'center', 'font-size':18, 'font-family':'Arial Black'}),
+                                html.Br(),
+                                html.P('Viereisessä kuvaajassa esitetään valittujen klustereiden alueet kahden avainluvun mukaan. Näin voidaan tarkastella yksittäisen klusterin sisäisten alkioiden hajautusta toisiinsa valittujen avainlukujen näkökulmasta. Useita klustereita valitsemalla voidaan myös tarkastella klustereiden välisiä eroavaisuuksia.',
+                                      style = {'font-size':20, 'font-family':'Arial'}),
+                                html.P('Kuviossa on myös koko maan vertailukohta esitetty harmaalla viisikulmiolla.',
+                                      style = {'font-size':20, 'font-family':'Arial'}
+                                      ),
+                                html.P('Viemällä hiiren valitun alkion tai koko maan vertailukohdan päälle, voi nähdä alueen, jonka kyseinen piste peittää. Esimerkiksi viemällä hiiren koko maan vertailukohdan päälle, voi muodostuneesta alueesta havainnoida mitkä alkiot jäävät koko maan vertailuarvojen sisälle.',
+                                       style = {'font-size':20, 'font-family':'Arial'}
+                                      ),
+                                html.P('Myös kuvaajan selitteessä olevista arvoista klikkaamalla voi valita mitä klustereita kuvaajassa näytetään.',
+                                      style = {'font-size':20, 'font-family':'Arial'}
+                                      )
+                                
+
+                            ],xs =12, sm=12, md=12, lg=3, xl=3),
+                     dbc.Col(id = 'inner_correlation_div',xs =12, sm=12, md=12, lg=9, xl=9)
+                             
+                   ]
+
         
 @app.callback(
     Output('correlation_div', 'children'),
@@ -1770,6 +1951,26 @@ def update_correlation_plot(feature1, feature2, data,  suomi):
     
     return dcc.Graph(id = 'correlation_plot', 
                      figure = plot_correlations(data, suomi, feature1, feature2)
+                    )
+
+
+@app.callback(
+    Output('inner_correlation_div', 'children'),
+    [Input('inner_feature1', 'value'),
+    Input('inner_feature2', 'value'),
+    Input('cluster_dropdown', 'value'), 
+    Input('data_store','data'),
+    Input('fin_store','data')]
+)
+def update_inner_correlation_plot(feature1, feature2, cluster, data,  suomi):
+    
+    if data is None:
+        print('is none')
+        raise PreventUpdate
+
+    
+    return dcc.Graph(id = 'correlation_plot', 
+                     figure = plot_inner_correlations(data, suomi, feature1, feature2, cluster)
                     )
                     
        
@@ -1800,6 +2001,41 @@ def update_feature2_dd(value, data):
 
 )
 def update_feature1_dd(value, data):
+    
+    cluster_features = data.features.values[0].split(';')
+    cluster_features = [c.strip() for c in cluster_features]
+    
+    extra_features = sorted([f['label'] for f in feature_selections if f['label'] not in cluster_features])
+    
+    return [{'label':f,'value':f,'title':'Klusteroinnin avainluku'} for f in sorted(cluster_features) if f != 'value']+[{'label':f,'value':f,'title':'Muu avainluku'} for f in extra_features if f != 'value']
+
+
+@app.callback(
+
+    Output('inner_feature2', 'options'),
+    [Input('inner_feature1', 'value'),
+    State('data_store','data')]
+
+)
+def update_inner_feature2_dd(value, data):
+    
+    cluster_features = data.features.values[0].split(';')
+    cluster_features = [c.strip() for c in cluster_features]
+    
+    extra_features = sorted([f['label'] for f in feature_selections if f['label'] not in cluster_features])
+
+    return [{'label':f,'value':f,'title':'Klusteroinnin avainluku'} for f in sorted(cluster_features) if f != 'value']+[{'label':f,'value':f,'title':'Muu avainluku'} for f in extra_features if f != 'value']
+
+
+
+@app.callback(
+
+    Output('inner_feature1', 'options'),
+    [Input('inner_feature2', 'value'),
+    State('data_store','data')]
+
+)
+def update_inner_feature1_dd(value, data):
     
     cluster_features = data.features.values[0].split(';')
     cluster_features = [c.strip() for c in cluster_features]
@@ -1926,7 +2162,7 @@ def plot_count_graph(data):
            }[pca]
        
     return [dcc.Graph(id='count_plot',figure=plot_counts(data)),
-            html.P('Jos kuvaaja ei näy kunnolla, klikkaa uudestaan klusterointipainiketta.', 
+            html.P('Jos kuvaaja ei näy kunnolla, klikkaa uudestaan klusterointipainiketta. Myös värejä voi vaihtaa tekemällä klusteroinnin uudestaan. Klusteroinnin uudelleen tekeminen ei vaikuta tuloksiin, ellei lähtöparamtereja muuteta.', 
                                        style = {'font-size':18, 'font-family':'Arial'}),
              html.P('Tämä kuvaaja havainnollistaa kuinka paljon {} on jokaisessa klusterissa.'.format(aluejako.lower().replace('kunta','kuntia')),
                                           style = {'font-size':18, 'font-family':'Arial'}),
