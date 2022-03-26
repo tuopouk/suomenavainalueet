@@ -1272,7 +1272,7 @@ def serve_layout():
                                           4:{'label':'4', 'style':{'font-size':20, 'fontFamily':'Arial Black','color':'white'}},
                                           5: {'label':'5', 'style':{'font-size':20, 'fontFamily':'Arial Black','color':'white'}},
                                           6:{'label':'6', 'style':{'font-size':20, 'fontFamily':'Arial Black','color':'white'}},
-                                          7: {'label':'6', 'style':{'font-size':20, 'fontFamily':'Arial Black','color':'white'}},
+                                          7: {'label':'7', 'style':{'font-size':20, 'fontFamily':'Arial Black','color':'white'}},
                                           8:{'label':'8', 'style':{'font-size':20, 'fontFamily':'Arial Black','color':'white'}},
                                          # 10:{'label':'10', 'style':{'font-size':20, 'fontFamily':'Arial Black','color':'white'}}
 #                                           12:{'label':'12', 'style':{'font-size':20, 'fontFamily':'Arial Black','color':'white'}},
