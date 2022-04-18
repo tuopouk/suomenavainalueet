@@ -30,6 +30,20 @@ import json
 
 in_dev = False
 
+
+config_plots = {'locale':'fi',
+#                 'editable':True,
+                "modeBarButtonsToRemove":["sendDataToCloud"],
+#                 'modeBarButtonsToAdd' : [
+#                                'drawline',
+#                                'drawopenpath',
+#                                'drawclosedpath',
+#                                'drawcircle',
+#                                'drawrect',
+#                                'eraseshape'
+#                                ],
+               "displaylogo":False}
+
 # Käytetyt värit.
 # https://en.wikipedia.org/wiki/List_of_colors:_A%E2%80%93F
 colors = pd.read_csv('colors_wikipedia.csv')
@@ -631,12 +645,13 @@ server.secret_key = os.environ.get('secret_key','secret')
 app = Dash(name = __name__, 
            prevent_initial_callbacks = False, 
            server = server,
+           external_scripts = ["https://raw.githubusercontent.com/plotly/plotly.js/master/dist/plotly-locale-fi.js"],
         #   meta_tags = [{'name':'viewport',
          #               'content':'width=device-width, initial_scale=1.0, maximum_scale=1.2, minimum_scale=0.5'}],
            external_stylesheets = external_stylesheets
           )
 
-
+app.scripts.append_script({"external_url": "https://cdn.plot.ly/plotly-locale-fi-latest.js"})
 app.title = 'Suomen avainalueet'
 
 
@@ -700,7 +715,7 @@ def get_area_counts():
 kuntamäärät_alueittain = get_area_counts()
 
 # Klusterointifunktio
-def cluster_data(n_clusters, data, features):
+def cluster_data(n_clusters, data, features, random_state):
     
     scl = StandardScaler()  
 
@@ -708,7 +723,7 @@ def cluster_data(n_clusters, data, features):
 
     X = scl.fit_transform(x)
 
-    kmeans = KMeans(n_clusters, random_state = 42)
+    kmeans = KMeans(n_clusters, random_state = random_state)
     
     preds = kmeans.fit_predict(X)
 
@@ -724,6 +739,7 @@ def cluster_data(n_clusters, data, features):
     data['pca'] = False
     data['explained_variance'] = np.nan
     data['components'] = len(features)
+    data['random_state'] = random_state
         
     color_df = colors.sample(len(colors)).copy()
     color_df.index = np.arange(len(colors))+1
@@ -764,7 +780,7 @@ def cluster_data(n_clusters, data, features):
 #     return pd.DataFrame([{'clusters':k, 'inertia':KMeans(n_clusters = k, random_state = 42).fit(PCA_components.iloc[:,:3]).inertia_} for k in range(2,11)])
 
 # Klusterointi PCA:lla
-def cluster_data_with_PCA(n_clusters, data, features, explained_variance):
+def cluster_data_with_PCA(n_clusters, data, features, explained_variance, random_state):
     
     
     
@@ -779,7 +795,7 @@ def cluster_data_with_PCA(n_clusters, data, features, explained_variance):
     
     #explained_variance = .95
     
-    pca = PCA(n_components = explained_variance, random_state = 42, svd_solver = 'full')
+    pca = PCA(n_components = explained_variance, random_state = random_state, svd_solver = 'full')
     principalComponents = pca.fit_transform(X)
     
     # Debuggaus variaation tarkastelua varten.
@@ -793,7 +809,7 @@ def cluster_data_with_PCA(n_clusters, data, features, explained_variance):
     
     n_pca_components = len(PCA_components.columns)
     
-    kmeans = KMeans(n_clusters, random_state = 42)
+    kmeans = KMeans(n_clusters, random_state = random_state)
         
     preds = kmeans.fit_predict(PCA_components)
 
@@ -809,6 +825,7 @@ def cluster_data_with_PCA(n_clusters, data, features, explained_variance):
     data['pca'] = True
     data['explained_variance'] = explained_variance
     data['components'] = n_pca_components
+    data['random_state'] = random_state
         
     color_df = colors.sample(len(colors)).copy()
     color_df.index = np.arange(len(colors))+1
@@ -1287,8 +1304,23 @@ def serve_layout():
                        html.Br(),
                    ],xs =12, sm=12, md=12, lg=6, xl=6)
                 ], style = {'margin' : '10px 10px 10px 10px'}),
+     #   html.Br(),
         
-        # 4. rivi
+        dbc.Row([
+            dbc.Col(xs = 4, sm = 4, md = 4, lg = 5, xl = 5),
+            dbc.Col([
+                html.H4('Syötä satunnaissiemen (positiivinen kokonaisluku)', style = {'textAlign':'center'}),
+                html.Br(),
+                dbc.Input(id = 'random_state', type="number", value = 42, size="lg", className="mb-3")
+            ],xs = 4, sm = 4, md = 4, lg = 2, xl = 2),
+            dbc.Col(xs = 4, sm = 4, md = 4, lg = 5, xl = 5)
+        
+        
+        
+        ],justify='center', style = {'margin' : '10px 10px 10px 10px'}),
+     #   html.Br(),
+        
+        
         dbc.Row([dash_daq.BooleanSwitch(id = 'pca_switch', 
                                          label = dict(label = 'Käytä pääkomponenttianalyysia',style = {'font-size':20, 'fontFamily':'Arial Black'}), 
                                           on = False, 
@@ -1329,6 +1361,7 @@ def serve_layout():
                                 ],
                  style = {'margin' : '10px 10px 10px 10px', 'display':'none'}, justify = 'center'),
         html.Br(),
+
         dbc.Row([
                        dbc.Button('Klusteroi',
                                   id='cluster_button',
@@ -1431,14 +1464,17 @@ def serve_layout():
                                html.P('Tässä sovelluksessa voidaan jakaa Suomen kunnat, seutukunnat tai maakunnat tilastollisesti merkittäviin avainalueisiin itse valittujen kuntien avainlukujen mukaan. Kuntien avainluvut ovat Tilastokeskuksen ylläpitämä data-aineisto, joka sisältää alueita koskevia tunnuslukuja. Tämä sovellus pyrkiikin täydentämään Kuntien avainluvut -palvelua mahdollistamalla kuntien, seutukuntien tai maakuntien ryhmittelyn (eli klusteroinnin) käyttäjän tarpeen mukaisilla indikaattoreilla. Klusterointi ei perustu alueiden maantieteelliseen sijaintiin vain ainoastaan alueiden avainlukuihin. Klusteroinnilla pyritään abstrahoimaan dataa suurempiin kokonaisuuksiin, joita ihmisten on helpompi käsitellä ja hallita. Klusterointi perustuu koneoppimiseen, jota sovelletaan ryhmittelysääntöjen muodostamisessa, minkä tekeminen manuaalisesti olisi (erityisesti usean muuttujan tapauksessa) hyvin vaikeaa. Tässä sovelluksessa pyritäänkin siis löytämään, koneoppimista hyödyntäen, uusia aluekokonaisuuksia tilastollisen datan avulla. ',style={'textAlign':'center','font-family':'Arial', 'font-size':20}), 
                                html.P('Käyttäjä voi valita avainlukujen ja aluetason lisäksi myös haluttujen klustereiden määrän. Klustereiden määrän valintaan ei ole oikeaa tai väärää vastausta. Haluttua määrää lieneekin hyvä tarkastella käyttäjän substanssin kautta. Jos on esimerkiksi tarkoitus perustaa tietty määrä aluekehitystyöryhmiä, on mahdollista valita klustereita tuo samainen määrä. Käyttäjä voi myös kokeilla eri lähtöarvoja klustereiden muodostamiseksi. Klusterointi perustuu tässä sovelluksessa ohjaamattomaan koneoppimiseen perustuvaan K-Means -klusterointiin, missä K on valittujen klustereiden määrä. Sivun alalaidasta löytyy linkki Wikipedia-artikkeliin K-Means -klusteroinnista.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
                                html.Br(),
+                               html.P('Klusteroinnin satunnaissiemenen asettaminen on toimenpide, jolla varmistetaan klusteroinnin toistettavuus. Klustereiden alustaminen on stokastinen prosessi, jossa klustereiden keskusta (englanniksi centroid) muodostetaan ensin satunnaisesti, minkä jälkeen klusterit hakeutuvat iteratiivisesti optimaaliseen tilaan (klustereiden sisäiset alkiot mahdollisimman lähellä toisiaan, ja klusterit mahdollisimman kaukana toisistaan). Satunnaissiemenen (eng. random seed) asettaminen vaikuttaa siten klustereiden alustukseen ja sitä kautta myös lopputulokseen. Käyttäjän tulee kokeilemalla valita sopiva satunnaissiemen esimerkiksi tarkastelemalla siluettisuuretta tai arvioimalla klustereita kvalitatiivisesta näkökulmasta. Mikäli muut valinnat pysyvät samoina, samalla satunnaissiemenellä saa aina samat klusterit, jolloin klusterointi voidaan toistaa. Käytetty satunnaissiemen tallentuu myös tulosexceliin.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                               html.Br(),
                                html.H4('Ohje',style={'textAlign':'center'}),
                                html.Br(),
                                html.P('1. Valitse valikosta halutut avainluvut klusterointimuuttujiksi. Voit myös valita kaikki valikon alla olevasta painikkeesta.', style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
                                html.P('2. Valitse haluttu aluetaso aluepainikkeista.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
                                html.P('3. Valitse klustereiden määrä vierittämällä valintapalkkia.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
-                               html.P('4. Valitse kytkimellä käytetäänkö pääkomponenttianalyysiä. Asiaa on selitetty alla olevalla tekstillä.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
-                               html.P('5. Valitse se osuus alkuperäisen datan variaatiosta, joka vähintään säilytetään PCA:ssa.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
-                               html.P('6. Klusteroi klikkaamalla "Klusteroi" -painiketta.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
+                               html.P('4. Syötä satunnaissiemeneksi mikä tahansa kokonaisluku.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
+                               html.P('5. Valitse kytkimellä käytetäänkö pääkomponenttianalyysiä. Asiaa on selitetty alla olevalla tekstillä.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
+                               html.P('6. Valitse se osuus alkuperäisen datan variaatiosta, joka vähintään säilytetään PCA:ssa.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
+                               html.P('7. Klusteroi klikkaamalla "Klusteroi" -painiketta.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
                                html.Br(),
                                html.H4('Pääkomponenttianalyysista',style={'textAlign':'center'}),
                                html.Br(),
@@ -1742,9 +1778,10 @@ def update_ev_indicator(pca, explained_variance):
     State('n_clusters', 'value'),
     State('features','value'),
     State('pca_switch','on'),
-    State('ev_slider', 'value')]
+    State('ev_slider', 'value'),
+    State('random_state','value')]
 )
-def perform_clustering(n_clicks,area, n_clusters, features, pca, explained_variance):
+def perform_clustering(n_clicks,area, n_clusters, features, pca, explained_variance, random_state):
     
     
     
@@ -1752,9 +1789,14 @@ def perform_clustering(n_clicks,area, n_clusters, features, pca, explained_varia
         
         data = data_dict[area]
         
-        data = {True: cluster_data_with_PCA(n_clusters, data, features, explained_variance),
-                False: cluster_data(n_clusters, data, features)
-               }[pca]
+#         data = {True: cluster_data_with_PCA(n_clusters, data, features, explained_variance,random_state),
+#                 False: cluster_data(n_clusters, data, features,random_state)
+#                }[pca]
+        
+        if pca:
+            data = cluster_data_with_PCA(n_clusters, data, features, explained_variance,random_state)
+        else:
+            data = cluster_data(n_clusters, data, features,random_state)
        
         koko_maa = koko_maa_dict[area]
         
@@ -1947,9 +1989,14 @@ def update_inner_correlations(data):
     Input('fin_store','data')]
 )
 def update_correlation_plot(feature1, feature2, data,  suomi):
-
     
+    if data is None:
+        print('is none')
+        raise PreventUpdate
+
+   
     return dcc.Graph(id = 'correlation_plot', 
+                     config = config_plots,
                      figure = plot_correlations(data, suomi, feature1, feature2)
                     )
 
@@ -1970,6 +2017,7 @@ def update_inner_correlation_plot(feature1, feature2, cluster, data,  suomi):
 
     
     return dcc.Graph(id = 'correlation_plot', 
+                     config = config_plots,
                      figure = plot_inner_correlations(data, suomi, feature1, feature2, cluster)
                     )
                     
@@ -2264,11 +2312,13 @@ def download(n_clicks, data):
         n_clusters = len(pd.unique(data.cluster))
         pca = data.pca.values[0]
         explained_variance = pd.DataFrame(data.explained_variance).fillna(0).values[0]
-        data.drop(['color','Aluejako','silhouette','inertia','features','pca','components','explained_variance'],axis=1,inplace=True)
+        random_state = data.random_state.values[0]
+        data.drop(['color','Aluejako','silhouette','inertia','features','pca','components','explained_variance','random_state'],axis=1,inplace=True)
         data.columns = data.columns.str.replace('cluster','Klusteri')
         
         metadata = pd.DataFrame([{'Aluejako':aluejako,
                                   'Klusterit':n_clusters,
+                                  'Satunnaissiemen': random_state,
                                   'Pääkomponenttianalyysi':{True:'Kyllä',False:'Ei'}[pca],
                                   'Säilytetty variaatio PCA:ssa': {True: str(int(100*explained_variance))+'%',False:'Ei sovellettu'}[pca],
                                   'Klusteroinnissa käytetyt komponentit': components,
