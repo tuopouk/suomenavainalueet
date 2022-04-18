@@ -1309,7 +1309,7 @@ def serve_layout():
         dbc.Row([
             dbc.Col(xs = 4, sm = 4, md = 4, lg = 5, xl = 5),
             dbc.Col([
-                html.H4('Syötä satunnaissiemen (positiivinen kokonaisluku)', style = {'textAlign':'center'}),
+                html.H4('Syötä satunnaissiemen (mikä tahansa luku)', style = {'textAlign':'center'}),
                 html.Br(),
                 dbc.Input(id = 'random_state', type="number", value = 42, size="lg", className="mb-3")
             ],xs = 4, sm = 4, md = 4, lg = 2, xl = 2),
@@ -1471,7 +1471,7 @@ def serve_layout():
                                html.P('1. Valitse valikosta halutut avainluvut klusterointimuuttujiksi. Voit myös valita kaikki valikon alla olevasta painikkeesta.', style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
                                html.P('2. Valitse haluttu aluetaso aluepainikkeista.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
                                html.P('3. Valitse klustereiden määrä vierittämällä valintapalkkia.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
-                               html.P('4. Syötä satunnaissiemeneksi mikä tahansa kokonaisluku.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
+                               html.P('4. Syötä satunnaissiemeneksi mikä tahansa luku.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
                                html.P('5. Valitse kytkimellä käytetäänkö pääkomponenttianalyysiä. Asiaa on selitetty alla olevalla tekstillä.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
                                html.P('6. Valitse se osuus alkuperäisen datan variaatiosta, joka vähintään säilytetään PCA:ssa.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
                                html.P('7. Klusteroi klikkaamalla "Klusteroi" -painiketta.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
