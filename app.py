@@ -1237,14 +1237,14 @@ def serve_layout():
                 dbc.Row(children = [
                     
                     dbc.Col(children=[
-                       html.H3('Valitse klusterointimuuttujat.',style={'textAlign':'center'}),
+                       html.H3('Valitse klusterointimuuttujat',style={'textAlign':'center'}),
                        html.Br(),
                        dcc.Dropdown(id = 'features', 
                             options = feature_selections, 
                             value = initial_features,
                             multi = True,
                             style = {'font-size':18, 'font-family':'Arial','color': 'black'},
-                            placeholder = 'Valitse klusterointimuuttujat.'),
+                            placeholder = 'Valitse klusterointimuuttujat'),
 
                        html.Br(),
                        dbc.Alert("Valitse ainakin yksi avainluku valikosta!", color="danger",
@@ -1278,7 +1278,7 @@ def serve_layout():
                                 style = {'textAlign':'center'}
                                ),
                        html.Br(),
-                       html.H3('Valitse klustereiden määrä.',style={'textAlign':'center'}),
+                       html.H3('Valitse klustereiden määrä',style={'textAlign':'center'}),
                        dcc.Slider(id = 'n_clusters',
                                  min = 2,
                                  max = 8,
@@ -1309,7 +1309,8 @@ def serve_layout():
         dbc.Row([
             dbc.Col(xs = 4, sm = 4, md = 4, lg = 5, xl = 5),
             dbc.Col([
-                html.H4('Syötä satunnaissiemen (mikä tahansa luku)', style = {'textAlign':'center'}),
+                html.H4('Syötä satunnaissiemeneksi mikä tahansa luku', style = {'textAlign':'center'}),
+                html.P('(Tämä mahdollistaa klusteroinnin toistettavuuden. Lisätietoja löydät Ohje ja esittely -välilehdeltä.)', style = {'textAlign':'center'}),
                 html.Br(),
                 dbc.Input(id = 'random_state', type="number", value = 42, size="lg", className="mb-3")
             ],xs = 4, sm = 4, md = 4, lg = 2, xl = 2),
@@ -1459,14 +1460,14 @@ def serve_layout():
                                html.Br(),
                                html.P('Avainluvuista avainalueisiin', style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
                                html.Br(),
-                               html.H4('Johdanto',style={'textAlign':'center'}),
+                               html.H4('Sovelluksen esittely',style={'textAlign':'center'}),
                                html.Br(),
                                html.P('Tässä sovelluksessa voidaan jakaa Suomen kunnat, seutukunnat tai maakunnat tilastollisesti merkittäviin avainalueisiin itse valittujen kuntien avainlukujen mukaan. Kuntien avainluvut ovat Tilastokeskuksen ylläpitämä data-aineisto, joka sisältää alueita koskevia tunnuslukuja. Tämä sovellus pyrkiikin täydentämään Kuntien avainluvut -palvelua mahdollistamalla kuntien, seutukuntien tai maakuntien ryhmittelyn (eli klusteroinnin) käyttäjän tarpeen mukaisilla indikaattoreilla. Klusterointi ei perustu alueiden maantieteelliseen sijaintiin vain ainoastaan alueiden avainlukuihin. Klusteroinnilla pyritään abstrahoimaan dataa suurempiin kokonaisuuksiin, joita ihmisten on helpompi käsitellä ja hallita. Klusterointi perustuu koneoppimiseen, jota sovelletaan ryhmittelysääntöjen muodostamisessa, minkä tekeminen manuaalisesti olisi (erityisesti usean muuttujan tapauksessa) hyvin vaikeaa. Tässä sovelluksessa pyritäänkin siis löytämään, koneoppimista hyödyntäen, uusia aluekokonaisuuksia tilastollisen datan avulla. ',style={'textAlign':'center','font-family':'Arial', 'font-size':20}), 
                                html.P('Käyttäjä voi valita avainlukujen ja aluetason lisäksi myös haluttujen klustereiden määrän. Klustereiden määrän valintaan ei ole oikeaa tai väärää vastausta. Haluttua määrää lieneekin hyvä tarkastella käyttäjän substanssin kautta. Jos on esimerkiksi tarkoitus perustaa tietty määrä aluekehitystyöryhmiä, on mahdollista valita klustereita tuo samainen määrä. Käyttäjä voi myös kokeilla eri lähtöarvoja klustereiden muodostamiseksi. Klusterointi perustuu tässä sovelluksessa ohjaamattomaan koneoppimiseen perustuvaan K-Means -klusterointiin, missä K on valittujen klustereiden määrä. Sivun alalaidasta löytyy linkki Wikipedia-artikkeliin K-Means -klusteroinnista.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
                                html.Br(),
                                html.P('Klusteroinnin satunnaissiemenen asettaminen on toimenpide, jolla varmistetaan klusteroinnin toistettavuus. Klustereiden alustaminen on stokastinen prosessi, jossa klustereiden keskusta (englanniksi centroid) muodostetaan ensin satunnaisesti, minkä jälkeen klusterit hakeutuvat iteratiivisesti optimaaliseen tilaan (klustereiden sisäiset alkiot mahdollisimman lähellä toisiaan, ja klusterit mahdollisimman kaukana toisistaan). Satunnaissiemenen (eng. random seed) asettaminen vaikuttaa siten klustereiden alustukseen ja sitä kautta myös lopputulokseen. Käyttäjän tulee kokeilemalla valita sopiva satunnaissiemen esimerkiksi tarkastelemalla siluettisuuretta tai arvioimalla klustereita kvalitatiivisesta näkökulmasta. Mikäli muut valinnat pysyvät samoina, samalla satunnaissiemenellä saa aina samat klusterit, jolloin klusterointi voidaan toistaa. Samaa satunnaissiementä hyödynnetään myös pääkomponenttianalyysissä. Käytetty satunnaissiemen tallentuu myös tulosexceliin.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
                                html.Br(),
-                               html.H4('Ohje',style={'textAlign':'center'}),
+                               html.H4('Sovelluksen käyttöhje',style={'textAlign':'center'}),
                                html.Br(),
                                html.P('1. Valitse valikosta halutut avainluvut klusterointimuuttujiksi. Voit myös valita kaikki valikon alla olevasta painikkeesta.', style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
                                html.P('2. Valitse haluttu aluetaso aluepainikkeista.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
