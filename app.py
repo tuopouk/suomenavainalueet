@@ -1021,9 +1021,9 @@ def plot_counts(data):
     
     return figure
 
-def plot_empty_map():
+# def plot_empty_map():
     
-    return px.choropleth_mapbox(center = {"lat": 64.961093, "lon": 27.590605})
+#     return px.choropleth_mapbox(center = {"lat": 64.961093, "lon": 27.590605})
 
 
 def plot_map(data, geojson, aluetaso):
@@ -1332,7 +1332,7 @@ def serve_layout():
         dbc.Row(id = 'ev_placeholder', 
                      children = [dbc.Col(xs = 3, sm = 3, md = 3, lg = 4, xl = 4),
                                  dbc.Col(xs = 6, sm = 6, md = 6, lg = 4, xl = 4,children = [
-                                     html.H4('Valitse säilytettävä variaatio.', style = {'textAlign':'center'}),
+                                     html.H4('Valitse säilytettävä variaatio', style = {'textAlign':'center'}),
                                      
                                      dcc.Slider(id = 'ev_slider',
                                             min = .7, 
@@ -1489,7 +1489,7 @@ def serve_layout():
                                html.Br(),
                                html.H4('Avainluvut klustereittain', style = {'text-align':'center'}),
                                html.Br(),
-                               html.P('Avainluvut klustereittain -lehdellä voi tarkastella klustereiden eroja valittujen avainlukujen suhteen. Pylväskuvioiden avulla pystyy havainnoimaan avinlukujen klusterikohtaisia keskiarvoja sekä miten ne suhtautuvat koko maan viitearvoon. Koko maan arvo on suhteellisissa luvuissa (esim. työllisyysaste) Tilastokeskuksen ilmoittama viitearvo, ja määrällisissä luvuissa (esim. väkiluku) alueiden keskiarvo. Pylväitä voi tarkastella sekä klusteroinnissa käytettyjen avainlukujen että klusteroinnin ulkopuolisten avainlukujen mukaan. Ensimmäinen kuvaaja indikoi enemmän klustereiden profiloinnista kun taas toinen kuvaaja pyrkii kuvaamaan mitä muita lisäpiirteitä klustereiden välille muodostui.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                               html.P('Avainluvut klustereittain -lehdellä voi tarkastella klustereiden eroja valittujen avainlukujen suhteen. Pylväskuvioiden avulla pystyy havainnoimaan avinlukujen klusterikohtaisia keskiarvoja sekä miten ne suhtautuvat koko maan viitearvoon. Koko maan viitearvo on suhteellisissa luvuissa (esim. työllisyysaste) Tilastokeskuksen ilmoittama viitearvo, ja määrällisissä luvuissa (esim. väkiluku) alueiden keskiarvo. Pylväitä voi tarkastella sekä klusteroinnissa käytettyjen avainlukujen että klusteroinnin ulkopuolisten avainlukujen mukaan. Ensimmäinen kuvaaja indikoi enemmän klustereiden profiloinnista kun taas toinen kuvaaja pyrkii kuvaamaan mitä muita lisäpiirteitä klustereiden välille muodostui.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
                                html.Br(),
                                html.H4('Klusterit kahden avainluvun mukaan',style={'textAlign':'center'}),
                                html.Br(),
@@ -2104,17 +2104,27 @@ def update_cluster_and_extra_feature(data):
         
     cluster_features = data.features.values[0].split(';')
     cluster_features = [c.strip() for c in cluster_features]
+    
+    
         
     extra_features = sorted([f['label'] for f in feature_selections if f['label'] not in cluster_features])
+    
+    cluster_features =  [{'label':f,'value':f,'title':'Klusteroinnin avainluku'} for f in cluster_features]
+    extra_features = [{'label':f,'value':f,'title':'Muu avainluku'} for f in extra_features]
+    
         
-    extra_features = {True:cluster_features, False: extra_features}[len(extra_features) == 0]
+    extra_features = {True:cluster_features, False: cluster_features+extra_features}[len(extra_features) == 0]
+    
+    initial_value = cluster_features[np.random.randint(len(cluster_features))]['value']
+    initial_extra_value = extra_features[np.random.randint(len(extra_features))]['value']
+    
     
     return [dbc.Col(
                         children=[
                               html.H3('Tarkastele klustereita valitun klusterointikriteerin mukaan.',style={'textAlign':'center',
                                                                                                            'font-size':28}),
                               html.Br(),
-                              html.P('Tässä voi tarkastella klustereita niiden muodostamisessa käytettyjen kriteerien mukaan',
+                              html.P('Tässä voi tarkastella klustereita niiden muodostamisessa käytettyjen avainlukujen mukaan.',
                                     style = {'font-family':'Arial','font-size':20}),
                               html.P('Alla olevissa pylväissä esitetään valitun avainluvun keskiarvot klustereittain sekä koko maan vertailuarvo.',
                                      style = {'font-family':'Arial','font-size':20} ),
@@ -2125,8 +2135,8 @@ def update_cluster_and_extra_feature(data):
                               dcc.Dropdown(id = 'single_feature', 
                                      placeholder = 'Valitse tarkasteltava avainluku',
                                      style = {'font-size':18, 'font-family':'Arial','color': 'black'},
-                                     value = cluster_features[np.random.randint(len(cluster_features))],      
-                                     options = [{'label':f,'value':f,'title':'Klusteroinnin avainluku'} for f in sorted(cluster_features)],
+                                     value = initial_value,      
+                                     options = cluster_features,
                                      multi = False),
                               html.Br(),
                               html.Div(id = 'feature_graph_div'),
@@ -2136,10 +2146,10 @@ def update_cluster_and_extra_feature(data):
                         ],xs =12, sm=12, md=12, lg=6, xl=6),
                  dbc.Col(
                          children=[
-                              html.H3('Tarkastele klustereita muun avainluvun mukaan.',style={'textAlign':'center',
+                              html.H3('Tarkastele klustereita minkä tahansa avainluvun mukaan.',style={'textAlign':'center',
                                                                                              'font-size':28}),
                               html.Br(),
-                              html.P('Tässä voi tarkastella klustereita niiden muodostamisessa käyttämättömien kriteerien mukaan',
+                              html.P('Tässä voi tarkastella klustereita myös niiden muodostamisessa käyttämättömien avainlukujen mukaan.',
                                     style = {'font-family':'Arial','font-size':20}),
                               html.P('Alla olevissa pylväissä esitetään valitun avainluvun keskiarvot klustereittain sekä koko maan vertailuarvo.',
                                      style = {'font-family':'Arial','font-size':20} ),
@@ -2150,8 +2160,8 @@ def update_cluster_and_extra_feature(data):
                               dcc.Dropdown(id = 'extra_feature', 
                                      placeholder = 'Valitse tarkasteltava avainluku',
                                      style = {'font-size':18, 'font-family':'Arial','color': 'black'},
-                                     value = extra_features[np.random.randint(len(extra_features))], 
-                                     options =  [{'label':f,'value':f,'title':'Muu avainluku'} for f in extra_features],
+                                     value = initial_extra_value, 
+                                     options =  extra_features,
                                           multi = False),
                               html.Br(),
                               html.Div(id = 'extra_feature_graph_div'),
