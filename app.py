@@ -652,7 +652,7 @@ app = Dash(name = __name__,
          #               'content':'width=device-width, initial_scale=1.0, maximum_scale=1.2, minimum_scale=0.5'}],
            external_stylesheets = external_stylesheets
           )
-
+app.scripts.config.serve_locally = False
 app.scripts.append_script({"external_url": "https://cdn.plot.ly/plotly-locale-fi-latest.js"})
 app.title = 'Suomen avainalueet'
 
@@ -1962,7 +1962,6 @@ def update_distribution_div(data, suomi):
     distribution_graph = dcc.Graph(id = 'distribution_graph', figure = draw_box_plots(data, value, suomi), config = config_plots)
     
     return [dbc.Col([
-                html.Br(),
                 html.H3('Valitse avainluku'),
                 html.Br(),
                 dropdown,
