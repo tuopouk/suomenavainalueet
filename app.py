@@ -983,8 +983,8 @@ def plot_feature(suomi, data, single_feature):
                                                  tickfont = dict(family = 'Arial', size = 16))))
     
     figure.add_hline(y = suomi.loc[single_feature].arvo,
-                    annotation_text =  '{} (~{} {})'.format(label, '{:,}'.format(round(koko_maa_ka,2)).replace(',',' '),unit),
-                    annotation_position="right",
+                    annotation_text =  '{}<br>(~{} {})'.format(label, '{:,}'.format(round(koko_maa_ka,2)).replace(',',' '),unit),
+                    annotation_position="bottom right",
                      annotation_font_size=20,
                      annotation_font_color="black",
                      line_color = 'black',
@@ -1247,13 +1247,14 @@ def draw_box_plots(df, feature, suomi):
                              hovertemplate = "<b>%{text}</b><br>"+feature+": %{y:,} ".replace(',',' ')+yksikkö))
 
     traces.append(go.Box(name='Kaikkien '+alue.lower().replace('kunta','kuntien')+'<br>jakauma', 
-                         y = df[feature],marker=dict(color='grey'),
+                         y = df[feature],
+                         marker=dict(color='grey'),
                          line=dict(width=2), 
                          boxmean='sd',
                          notched=True,
                           text = df.index, 
                          boxpoints='all', 
-                         hovertemplate = "<b>%{text}</b><br>"+feature+": {%y:,} ".replace(',',' ')+yksikkö))    
+                         hovertemplate = "<b>%{text}</b><br>"+feature+": %{y:,} ".replace(',',' ')+yksikkö))    
 
 
 
