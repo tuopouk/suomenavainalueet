@@ -27,6 +27,9 @@ import time
 from datetime import datetime
 import io
 import json
+import locale
+locale.setlocale(locale.LC_ALL, 'fi_FI')
+#locale.setlocale(locale.LC_ALL, 'fi-FI')
 
 in_dev = False
 
@@ -34,14 +37,14 @@ in_dev = False
 config_plots = {'locale':'fi',
 #                 'editable':True,
                 "modeBarButtonsToRemove":["sendDataToCloud"],
-#                 'modeBarButtonsToAdd' : [
-#                                'drawline',
-#                                'drawopenpath',
-#                                'drawclosedpath',
-#                                'drawcircle',
-#                                'drawrect',
-#                                'eraseshape'
-#                                ],
+                'modeBarButtonsToAdd' : [
+                               'drawline',
+                               'drawopenpath',
+                               'drawclosedpath',
+                               'drawcircle',
+                               'drawrect',
+                               'eraseshape'
+                               ],
                "displaylogo":False}
 
 # Käytetyt värit.
@@ -633,7 +636,6 @@ geojson_map = {'Kunta':kuntarajat, 'Maakunta':maakuntarajat, 'Seutukunta': seutu
 
 spinners = ['graph', 'cube', 'circle', 'dot' ,'default']
 
-
 external_stylesheets = [dbc.themes.SUPERHERO,
                         "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css",
                         'https://codepen.io/chriddyp/pen/brPBPO.css'
@@ -726,8 +728,21 @@ def cluster_data(n_clusters, data, features, random_state):
     kmeans = KMeans(n_clusters, random_state = random_state)
     
     preds = kmeans.fit_predict(X)
+    
+    centroids = kmeans.cluster_centers_
+    centroids = scl.inverse_transform(centroids)
+ 
 
     clusters = preds + 1 
+    
+    
+    ## Tässä koodi, jolla lasketaan clusterien keskukset.
+    ## Tällä ei ole vielä käyttötapausta.
+#     centroid_df = pd.DataFrame(centroids,columns=features)
+#     centroid_df['cluster'] = sorted(np.unique(clusters))
+#     centroid_df = centroid_df.set_index('cluster')
+#     centroid_df.to_csv('centroid_df.csv')
+    
     
     inertia = round(kmeans.inertia_,2)
     silhouette = round(silhouette_score(X, preds),2)
@@ -791,9 +806,6 @@ def cluster_data_with_PCA(n_clusters, data, features, explained_variance, random
 
     X = scl.fit_transform(x)
 
-    # 95 % selitetty varianssi
-    
-    #explained_variance = .95
     
     pca = PCA(n_components = explained_variance, random_state = random_state, svd_solver = 'full')
     principalComponents = pca.fit_transform(X)
@@ -812,8 +824,20 @@ def cluster_data_with_PCA(n_clusters, data, features, explained_variance, random
     kmeans = KMeans(n_clusters, random_state = random_state)
         
     preds = kmeans.fit_predict(PCA_components)
+    
+
 
     clusters = preds + 1 
+    
+    ## Tässä koodi, jolla lasketaan clusterien keskukset.
+    ## Tällä ei ole vielä käyttötapausta.
+    centroids = kmeans.cluster_centers_
+#     centroids = pca.inverse_transform(centroids)
+#     centroids = scl.inverse_transform(centroids)
+#     centroid_df = pd.DataFrame(centroids,columns=features)
+#     centroid_df['cluster'] = sorted(np.unique(clusters))
+#     centroid_df = centroid_df.set_index('cluster')
+
     
     inertia = round(kmeans.inertia_,2)
     silhouette = round(silhouette_score(X, preds),2)
@@ -960,7 +984,7 @@ def plot_feature(suomi, data, single_feature):
     
     figure.add_hline(y = suomi.loc[single_feature].arvo,
                     annotation_text =  '{} (~{} {})'.format(label, '{:,}'.format(round(koko_maa_ka,2)).replace(',',' '),unit),
-                    annotation_position="top left",
+                    annotation_position="left",
                      annotation_font_size=20,
                      annotation_font_color="black",
                      line_color = 'black',
@@ -1200,6 +1224,59 @@ def plot_inner_correlations(data, suomi, feature1, feature2, clusters):
     
     return fig
 
+def draw_box_plots(df, feature, suomi):
+    
+    traces = []
+    alue = df.Aluejako.values[0]
+    baseline = suomi.loc[feature].arvo
+    yksikkö = suomi.loc[feature].yksikkö
+    
+    for cluster in pd.unique(df.cluster):
+    
+        dff = df[(df.cluster==cluster)]
+        
+    
+        traces.append(go.Box(name=str(cluster), 
+                             y = dff[feature], 
+                             boxmean='sd',
+                             text = dff.index,
+                             notched=True,
+                             line=dict(width=2), 
+                             boxpoints='all', 
+                             marker = dict(color = dff.color.values[0]),
+                             hovertemplate = "<b>%{text}</b><br>"+feature+": %{y:,} ".replace(',',' ')+yksikkö))
+
+    traces.append(go.Box(name='Kaikkien '+alue.lower().replace('kunta','kuntien')+'<br>jakauma', 
+                         y = df[feature],marker=dict(color='grey'),
+                         line=dict(width=2), 
+                         boxmean='sd',
+                         notched=True,
+                          text = df.index, 
+                         boxpoints='all', 
+                         hovertemplate = "<b>%{text}</b><br>"+feature+": {%y:,} ".replace(',',' ')+yksikkö))    
+
+
+
+
+    fig = go.Figure(data=traces, layout = go.Layout(title = dict(text = '<b>'+feature+'</b>:<br>jakaumat klustereittain',x=.5,font=dict(family='Arial',size=25)),
+                                             xaxis=dict(title=dict(text = 'Klusterit',font=dict(size=20, family = 'Arial Black')), 
+                                                      tickfont = dict(family = 'Arial Black', size = 16)),
+                                              height=1000,     
+                                              template = 'seaborn',
+                                              hoverlabel=dict(font_size = 16, font_family = 'Arial'),
+                                              legend=dict(title = '<b>Klusterit</b>', font=dict(size=18)),
+                                             yaxis= dict(title=dict(text = feature,font=dict(size=20, family = 'Arial Black')), 
+                                                      tickfont = dict(family = 'Arial Black', size = 16))))
+
+    fig.add_hline(baseline,
+                        annotation_text =  'Koko maan viitearvo<br>({:,} {})'.format(baseline,yksikkö).replace(',',' '),
+                        annotation_position="right",
+                         annotation_font_size=15,
+                         annotation_font_color="black",
+                         line_color = 'grey',
+                        line = dict(width =2, dash ='dot'))
+    return fig
+
 
 
 kunnat_koko_maa, kunnat_data = get_data('Kunta')
@@ -1398,6 +1475,17 @@ def serve_layout():
                 
             ]),
             
+            dbc.Tab(label = 'Klusterien jakaumat',
+                    tabClassName="flex-grow-1 text-center",
+                    tab_style = {'font-size':28},
+                    children = [
+                        
+                        html.Br(),
+                        dbc.Row(id = 'distributions',justify='center', style = {'margin' : '10px 10px 10px 10px'})
+                    
+                    ]
+                   ),
+            
             dbc.Tab(label = 'Avainluvut klustereittain',
                     tabClassName="flex-grow-1 text-center",
                     tab_style = {'font-size':28},
@@ -1486,6 +1574,10 @@ def serve_layout():
                                html.Br(),
                                html.P('Klusterit ja sijainnit -välilehdellä käyttäjä voi tarkastella klustereiden kokoja (eli niiden sisältämien alueiden määrää) sekä niiden alueellista jakautumista. Tämä auttaa myös klustereiden määrän määrittelyssä, mikäli halutaan mahdollisimman tasaisesti jakautuneita klustereita. Mikäli käyttäjä on valinnut pääkomponenttianalyysin hyödyntämisen, tulostuu pylväskuvion alle ilmoitus pääkomponenttien määrästä. Pylväskuvion alle ilmestyy myös klusteroinnin inertia -ja siluettipisteet. Ne ovat indikaattoreita, jotka kuvaavat klustereiden jakautumista. Parhaassa tapauksessa klusterit sisältävät samanlaisia jäseniä, ja klusterit ovat kaukana toisistaan. Inertia kuvaa vain edellistä, kun taas siluetti kuvaa kokonaisuutta. Inertialle ei ole viitearvoa, mutta pienemmät arvot kertovat paremmasta klusterin sisäisestä jaosta. Siluetti saa arvoja -1 ja 1 väliltä. Teoriassa lähempänä ykköstä oleva siluettiarvo kuvaa hyvää klusterijakoa ja lähellä nollaa olevat arvot indikoivat samanlaisia klustereita. Käytännössä kuitenkin saavutettavat arvot riippuvat alkuperäisestä aineistosta, eikä ole viitearvoja siitä mikä on paras mahdollinen siluettiarvo, joka voidaan muodostaa ko. aineisto klusteroimalla. Tämänkin indikaattorin muutosta käyttäjä voi tarkastella klusterointiasetuksia muuttamalla.',style = {'textAlign':'center','font-family':'Arial', 'font-size':20}),
                                html.P('Klikkaamalla "Lataa karttanäkymä" -painiketta, voi klustereiden maantieteellistä jakautumista tarkastella kartalla. Kartta perustuu Mapboxin tarjoamiin avoimiin kartta-aineistoihin, johon on yhdistetty vuoden 2021 kunta-aluejako. Kartta saattaa latautua hitaasti erityisesti usean klusterin tapauksessa. Mikäli kartta ei ilmesty, kannattaa odottaa hetki ja kokeilla uudestaan. Lisäksi klusteroinnin tulokset voi viedä Excel-tiedostoon klikkaamalla "Lataa tiedosto koneelle" -nappia. Tiedostoon tulostuu kuntien avainluvut klustereittain sekä klusteroinnin metatiedot (valitut muuttujat, klustereiden määrä, aluetasosekä laatuindikaattorit).',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                               html.Br(),
+                               html.H4('Klusterien jakaumat',style={'textAlign':'center'}),
+                               html.Br(),
+                               html.P('Klusterien jakaumat -välilehdellä voi tarkastella klustereiden sisäistä jakumaa valitun avainluvun suhteen. Näin voidaan havainnoida klusterien perusstatistiikkaa, kuten hajontaa, keskiarvoja ja kvantiileja, sekä tunnistaa poikkeavia alueita klustereiden sisällä.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
                                html.Br(),
                                html.H4('Avainluvut klustereittain', style = {'text-align':'center'}),
                                html.Br(),
@@ -1839,10 +1931,88 @@ def update_count_and_map(n_clicks):
  
 
 @app.callback(
+    Output('distributions', 'children'),
+    [Input('data_store', 'data'),
+    Input('fin_store','data')]
+)
+def update_distribution_div(data, suomi):
+    
+    if data is None:
+        raise PreventUpdate
+        
+    cluster_features = data.features.values[0].split(';')
+            
+    cluster_features = [c.strip() for c in cluster_features]
+    
+    extra_features = sorted([f['label'] for f in feature_selections if f['label'] not in cluster_features])
+
+    options = [{'label':f,'value':f,'title':'Klusteroinnin avainluku'} for f in sorted(cluster_features) if f != 'value']+[{'label':f,'value':f,'title':'Muu avainluku'} for f in extra_features if f != 'value']
+    
+    value = cluster_features[np.random.randint(len(cluster_features))]
+    
+    dropdown = dcc.Dropdown(id = 'distribution_dropdown',
+                                           
+                options = options, 
+                value = value,
+                multi = False,
+                placeholder = 'Valitse avainluku',
+                style = {'font-size':16, 'font-family':'Arial','color': 'black'}
+                )
+    
+    distribution_graph = dcc.Graph(id = 'distribution_graph', figure = draw_box_plots(data, value, suomi), config = config_plots)
+    
+    return [dbc.Col([
+                html.Br(),
+                html.H3('Valitse avainluku'),
+                html.Br(),
+                dropdown,
+                html.Br(),
+                html.P('Viereisessä kuvaajassa on esitetty valitun avainluvun jakauma jokaiselle klusterille sekä kaikille alueille. Yllä olevasta valikosta voi valita joko klusteroinnissa hyödynnetyn tai jonkin muun avain luvun. Valikko on järjestetty siten, että ensimmäisinä ovat klusteroinnin avainluvut. Kuvion laatikko-janakuvioita voi valita tai piilottaa klikkaamalla niitä kuvion oikealla puolella olevasta selitteestä.',style = {'font-size':20, 'font-family':'Arial'}),
+                html.P('Kyseinen kuvio on laatikko-janakuvio, joka esittää muuttujan jakauman sekä tilastolliset tunnusluvut klustereittain.  Laatikko-janakuvio muodostuu laatikosta, janoista sekä yksittäisistä pisteistä. Laatikon alareuna on ns. 1. kvartiili (q1), eli arvo, jonka alittaa 25% klusterin alueista. Vastaavasti yläreuna (ns. 3. kvartiili tai q3) on arvo, jonka 75% klusterin alueista alittaa. Laatikossa on yhtenäisellä viivalla kuvattu klusterin mediaani, sekä katkoviivalla klusterin keskiarvo. Laatikon ympäröivä timanttikuvio esittää jakauman keskihajontaa. Laatikko-janakuvion janat muodostuvat siten, että ne ovat noin 1,5 kertaisen interkvartiilisäteen (q3 - q1) etäisyydellä lähimmistä kvantiileistaan. Näiden janojen ulkopuoliset pisteet ovat poikkeavia alueita (outliers), joissa kyseinen avainluku poikkeaa suuruudeltaan muista alueista. ',style = {'font-size':20, 'font-family':'Arial'}),
+                html.A('Laatikko-janakuvio Tilastokeskuksen tilastokoulussa', href = 'https://tilastokoulu.stat.fi/verkkokoulu_v2.xql?page_type=sisalto&course_id=tkoulu_tilaj&lesson_id=2&subject_id=21', target="_blank",style = {'font-size':18, 'font-family':'Arial'}),
+                html.Br(),
+                html.Br(),
+                html.P('Huomio, että laatikkokuvioissa on esitetty mediaanien 95% luottamusvälit lovilla. Kun laatikkokuviot visualisoidaan vierekkäin, voidaan tarkastella kuinka kyseisten klusterien mediaanien luottamusvälit ovat päällekkäisiä. Päällekkäisyyden puuttuminen mielletään usein tulkinnaksi siitä, että kyseiset datasetit, ts. klusterit ovat oleellisesti erilaisia.',style = {'font-size':20, 'font-family':'Arial'}),
+                html.P('Kuviossa on klustereiden jakaumien lisäksi myös kaikkien alueiden jakauma omana laatikko-janakuvionaan. Kuvion poikki kulkeva katkoviiva on valitun avainluvun koko maan viitearvo.',style = {'font-size':20, 'font-family':'Arial'})
+        
+            ],
+        xs =12, sm=12, md=12, lg=3, xl=3),
+           
+            dbc.Col([
+                
+                
+                distribution_graph
+                    ],
+                    xs =12, sm=12, md=12, lg=9, xl=9)
+           
+           ]
+
+@app.callback(
+
+    Output('distribution_graph', 'figure'),
+    [Input('data_store', 'data'),
+     Input('distribution_dropdown','value'),
+     Input('fin_store','data')
+    ]
+
+)
+def update_box_plot(data, feature, suomi):
+    
+    if data is None:
+        raise PreventUpdate
+    
+    return draw_box_plots(data, feature,suomi)
+    
+    
+
+@app.callback(
     Output('correlations', 'children'),
     [Input('data_store', 'data')]
 )
 def update_correlations(data):
+    
+    if data is None:
+        raise PreventUpdate
     
     cluster_features = data.features.values[0].split(';')
             
