@@ -984,7 +984,7 @@ def plot_feature(suomi, data, single_feature):
     
     figure.add_hline(y = suomi.loc[single_feature].arvo,
                     annotation_text =  '{} (~{} {})'.format(label, '{:,}'.format(round(koko_maa_ka,2)).replace(',',' '),unit),
-                    annotation_position="left",
+                    annotation_position="right",
                      annotation_font_size=20,
                      annotation_font_color="black",
                      line_color = 'black',
