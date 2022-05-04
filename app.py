@@ -28,8 +28,13 @@ from datetime import datetime
 import io
 import json
 import locale
-locale.setlocale(locale.LC_ALL, 'fi_FI')
-#locale.setlocale(locale.LC_ALL, 'fi-FI')
+
+# riippu ollaanko Windows vai Linux -ympäristössä, mitä locale-koodausta käytetään.
+
+try:
+    locale.setlocale(locale.LC_ALL, 'fi_FI')
+except:
+    locale.setlocale(locale.LC_ALL, 'fi-FI')
 
 in_dev = False
 
@@ -728,20 +733,19 @@ def cluster_data(n_clusters, data, features, random_state):
     kmeans = KMeans(n_clusters, random_state = random_state)
     
     preds = kmeans.fit_predict(X)
-    
-    centroids = kmeans.cluster_centers_
-    centroids = scl.inverse_transform(centroids)
+       
  
-
     clusters = preds + 1 
     
     
-    ## Tässä koodi, jolla lasketaan clusterien keskukset.
-    ## Tällä ei ole vielä käyttötapausta.
-#     centroid_df = pd.DataFrame(centroids,columns=features)
-#     centroid_df['cluster'] = sorted(np.unique(clusters))
-#     centroid_df = centroid_df.set_index('cluster')
-#     centroid_df.to_csv('centroid_df.csv')
+    ## Tässä koodi, jolla lasketaan klusterien keskukset.
+    centroids = kmeans.cluster_centers_
+    centroids = scl.inverse_transform(centroids)
+    centroid_df = pd.DataFrame(centroids,columns=features)
+    centroid_df['Klusteri'] = sorted(np.unique(clusters))
+    centroid_df = centroid_df.set_index('Klusteri').T
+    centroid_df.index.name = 'Avainluku / Klusterit'
+
     
     
     inertia = round(kmeans.inertia_,2)
@@ -774,7 +778,7 @@ def cluster_data(n_clusters, data, features, random_state):
     data = data.set_index('Alue')
    
 
-    return data
+    return data,centroid_df
 
 # Tämä osio on jätetty pois tuotannosta tehokkuussyistä.
 # Testeissä tämän lisääminen hidastaisi sovelluksen pyörimistä 
@@ -819,6 +823,7 @@ def cluster_data_with_PCA(n_clusters, data, features, explained_variance, random
     
     PCA_components = pd.DataFrame(principalComponents)
     
+    
     n_pca_components = len(PCA_components.columns)
     
     kmeans = KMeans(n_clusters, random_state = random_state)
@@ -829,14 +834,15 @@ def cluster_data_with_PCA(n_clusters, data, features, explained_variance, random
 
     clusters = preds + 1 
     
-    ## Tässä koodi, jolla lasketaan clusterien keskukset.
+    ## Tässä koodi, jolla lasketaan klusterien keskukset.
     ## Tällä ei ole vielä käyttötapausta.
     centroids = kmeans.cluster_centers_
-#     centroids = pca.inverse_transform(centroids)
-#     centroids = scl.inverse_transform(centroids)
-#     centroid_df = pd.DataFrame(centroids,columns=features)
-#     centroid_df['cluster'] = sorted(np.unique(clusters))
-#     centroid_df = centroid_df.set_index('cluster')
+    centroids = pca.inverse_transform(centroids)
+    centroids = scl.inverse_transform(centroids)
+    centroid_df = pd.DataFrame(centroids,columns=features)
+    centroid_df['Klusteri'] = sorted(np.unique(clusters))
+    centroid_df = centroid_df.set_index('Klusteri').T
+    centroid_df.index.name = 'Avainluku / Klusterit'
 
     
     inertia = round(kmeans.inertia_,2)
@@ -869,7 +875,7 @@ def cluster_data_with_PCA(n_clusters, data, features, explained_variance, random
     data = data.set_index('Alue')
     
 
-    return data
+    return data,centroid_df
 
 # Baseline -apufunktio
 def choose_value(primary, secondary, unit):
@@ -1241,9 +1247,10 @@ def draw_box_plots(df, feature, suomi):
                              boxmean='sd',
                              text = dff.index,
                              notched=True,
-                             line=dict(width=2), 
+                             line=dict(width=2),
                              boxpoints='all', 
-                             marker = dict(color = dff.color.values[0]),
+                             marker = dict(color = dff.color.values[0],
+                                          line = dict(color='DarkSlateGrey')),
                              hovertemplate = "<b>%{text}</b><br>"+feature+": %{y:,} ".replace(',',' ')+yksikkö))
 
     traces.append(go.Box(name='Kaikkien '+alue.lower().replace('kunta','kuntien')+'<br>jakauma', 
@@ -1552,9 +1559,10 @@ def serve_layout():
                                html.H4('Sovelluksen esittely',style={'textAlign':'center'}),
                                html.Br(),
                                html.P('Tässä sovelluksessa voidaan jakaa Suomen kunnat, seutukunnat tai maakunnat tilastollisesti merkittäviin avainalueisiin itse valittujen kuntien avainlukujen mukaan. Kuntien avainluvut ovat Tilastokeskuksen ylläpitämä data-aineisto, joka sisältää alueita koskevia tunnuslukuja. Tämä sovellus pyrkiikin täydentämään Kuntien avainluvut -palvelua mahdollistamalla kuntien, seutukuntien tai maakuntien ryhmittelyn (eli klusteroinnin) käyttäjän tarpeen mukaisilla indikaattoreilla. Klusterointi ei perustu alueiden maantieteelliseen sijaintiin vain ainoastaan alueiden avainlukuihin. Klusteroinnilla pyritään abstrahoimaan dataa suurempiin kokonaisuuksiin, joita ihmisten on helpompi käsitellä ja hallita. Klusterointi perustuu koneoppimiseen, jota sovelletaan ryhmittelysääntöjen muodostamisessa, minkä tekeminen manuaalisesti olisi (erityisesti usean muuttujan tapauksessa) hyvin vaikeaa. Tässä sovelluksessa pyritäänkin siis löytämään, koneoppimista hyödyntäen, uusia aluekokonaisuuksia tilastollisen datan avulla. ',style={'textAlign':'center','font-family':'Arial', 'font-size':20}), 
+                               html.Br(),
                                html.P('Käyttäjä voi valita avainlukujen ja aluetason lisäksi myös haluttujen klustereiden määrän. Klustereiden määrän valintaan ei ole oikeaa tai väärää vastausta. Haluttua määrää lieneekin hyvä tarkastella käyttäjän substanssin kautta. Jos on esimerkiksi tarkoitus perustaa tietty määrä aluekehitystyöryhmiä, on mahdollista valita klustereita tuo samainen määrä. Käyttäjä voi myös kokeilla eri lähtöarvoja klustereiden muodostamiseksi. Klusterointi perustuu tässä sovelluksessa ohjaamattomaan koneoppimiseen perustuvaan K-Means -klusterointiin, missä K on valittujen klustereiden määrä. Sivun alalaidasta löytyy linkki Wikipedia-artikkeliin K-Means -klusteroinnista.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
                                html.Br(),
-                               html.P('Klusteroinnin satunnaissiemenen asettaminen on toimenpide, jolla varmistetaan klusteroinnin toistettavuus. Klustereiden alustaminen on stokastinen prosessi, jossa klustereiden keskusta (englanniksi centroid) muodostetaan ensin satunnaisesti, minkä jälkeen klusterit hakeutuvat iteratiivisesti optimaaliseen tilaan (klustereiden sisäiset alkiot mahdollisimman lähellä toisiaan, ja klusterit mahdollisimman kaukana toisistaan). Satunnaissiemenen (eng. random seed) asettaminen vaikuttaa siten klustereiden alustukseen ja sitä kautta myös lopputulokseen. Käyttäjän tulee kokeilemalla valita sopiva satunnaissiemen esimerkiksi tarkastelemalla siluettisuuretta tai arvioimalla klustereita kvalitatiivisesta näkökulmasta. Mikäli muut valinnat pysyvät samoina, samalla satunnaissiemenellä saa aina samat klusterit, jolloin klusterointi voidaan toistaa. Samaa satunnaissiementä hyödynnetään myös pääkomponenttianalyysissä. Käytetty satunnaissiemen tallentuu myös tulosexceliin.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                               html.P('Klusteroinnin suorittamisen jälkeen, tässä sovelluksessa voi tarkastella syntyneitä alueryppäitä sekä niiden tilastollisia ominaisuuksia usealla tavalla. Klusteroidun datan voi myös viedä tulosexceliin, klikkaamalla sille varattua painiketta "Klusterit ja sijainnit"-välilehdellä. Visualisoinneissa on käytetty yhtenäistä värikoodausta siten, että jokaisen välilehdellä jokainen klusteri on esitetty samalla värillä. Värit ovat satunnaisesti generoituja ja perustuvat lähdeviittauksista löytyvään Wikipedian listaukseen olemassa olevista väreistä. Mikäli käyttäjä haluaa toiset värit käyttöönsä visualisoinneissa, riittää kun suorittaa klusteroinnin uudestaan (klikkaamalla "Klusteroi"-painiketta).',style={'textAlign':'center','font-family':'Arial', 'font-size':20}), 
                                html.Br(),
                                html.H4('Sovelluksen käyttöhje',style={'textAlign':'center'}),
                                html.Br(),
@@ -1566,10 +1574,22 @@ def serve_layout():
                                html.P('6. Valitse se osuus alkuperäisen datan variaatiosta, joka vähintään säilytetään PCA:ssa.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
                                html.P('7. Klusteroi klikkaamalla "Klusteroi" -painiketta.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
                                html.Br(),
+                               html.H4('Satunnaissiemenen asettaminen', style = {'textAlign':'center'}),
+                               html.Br(),
+                               html.P('Klusteroinnin satunnaissiemenen asettaminen on toimenpide, jolla varmistetaan klusteroinnin toistettavuus. Klustereiden alustaminen on stokastinen prosessi, jossa klustereiden keskusta (englanniksi centroid) muodostetaan ensin satunnaisesti, minkä jälkeen klusterit hakeutuvat iteratiivisesti optimaaliseen tilaan (klustereiden sisäiset alkiot mahdollisimman lähellä toisiaan, ja klusterit mahdollisimman kaukana toisistaan). Satunnaissiemenen (eng. random seed) asettaminen vaikuttaa siten klustereiden alustukseen ja sitä kautta myös lopputulokseen. Käyttäjän tulee kokeilemalla valita sopiva satunnaissiemen esimerkiksi tarkastelemalla siluettisuuretta tai arvioimalla klustereita kvalitatiivisesta näkökulmasta. Mikäli muut valinnat pysyvät samoina, samalla satunnaissiemenellä saa aina samat klusterit, jolloin klusterointi voidaan toistaa. Samaa satunnaissiementä hyödynnetään myös pääkomponenttianalyysissä. Käytetty satunnaissiemen tallentuu myös tulosexceliin.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                               html.Br(),
                                html.H4('Pääkomponenttianalyysista',style={'textAlign':'center'}),
                                html.Br(),
                                html.P('Pääkomponenttianalyysilla (englanniksi Principal Component Analysis, PCA) pyritään minimoimaan käytettyjen muuttujien määrää pakkaamalla ne sellaisiin kokonaisuuksiin, jotta hyödynnetty informaatio säilyy. Informaation säilyvyyttä mitataan selitetyllä varianssilla (eng. explained variance), joka tarkoittaa uusista pääkomponenteista luodun datan hajonnan säilyvyyttä alkuperäiseen dataan verrattuna. Tässä sovelluksessa selitetyn varianssin (tai säilytetyn variaation) osuuden voi valita itse, mikäli hyödyntää PCA:ta. Näin saatu pääkomponenttijoukko on siten pienin sellainen joukko, joka säilyttää vähintään valitun osuuden alkuperäisen datan hajonnasta. Näin PCA-algoritmi muodostaa juuri niin monta pääkomponenttia, jotta selitetyn varianssin osuus pysyy haluttuna.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
                               html.P('PCA on yleisesti hyödyllinen toimenpide silloin, kun valittuja klusterointimuuttujia on paljon, milloin on myös mahdollista, että osa valituista muuttujista aiheuttaa datassa kohinaa, mikä taas johtaa heikompaan klusterijakoon. Sillä voi myös nopeuttaa klusterointia, koska muuttujien määrä laskee. Pääkomponenttianalyysistä on kuitenkin hyvä pitä mielessä, että pääkomponentteja ei pysty palauttamaan alkuperäisiin muuttujiin. Pienellä määrällä tarkasti harkittuja muuttujia PCA ei ole välttämätön.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                               html.Br(),
+                               html.H4('Tietojen viennistä tiedostoon',style={'textAlign':'center'}),
+                               html.Br(),
+                               html.P('Klusteroinnin tulokset voi viedä tulosexceliin, "Klusterit ja sijainnit" -välilehdellä olevan painikkeen kautta. Excel-tiedosto sisältää valitun aluetason alueet avainluvuittain ryhmiteltyinä klustereihin, klusteroinnin metadatan, klustereiden keskukset sekä käytetyt koko maan viitearvot. Klusteroinnin metadata sisältää käyttäjän tekemät klusterointivalinnat sekä syntyneet tekniset suureet (siluetti, pääkomopenttien määrä jne.). Koko maan viitearvot ovat joko Tilastokeskuksen raportoimat kuntien avainluvut koko maan osalta tai keskiarvo kaikille alueille. Yleisesti käytössä on tässä sovelluksessa koko maan arvo, mutta keskiarvoa on hyödynnetty niillä avainluvuilla, joihin se soveltuu paremmin. Esimerkiksi kuntien välinen nettomuutto on laskettu kuntien keskiarvona, koska se olisi luonnollisesti koko maan osalta nolla. Klusteroinnin keskukset ovat ne avainlukujen arvot, jotka yhdessä muodostavat klustereiden keskipisteet. Käytännössä se on klustereiden aritmeettinen keskiarvo, joita voi tarkastella myös tämän sovelluksen visualisoinneissa. Kuitenkin on syytä huomioida, että käytettäessä pääkomponenttianalyysiä, voi keskusten arvot tilastollis-teknisistä syistä johtuen hieman poiketa klustereiden keskiarvoista.',style = {'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                               html.Br(),
+                               html.H4('Klustereiden määrän valinnasta',style={'textAlign':'center'}),
+                               html.Br(),
+                               html.P('Käytettäessä K-keskiarvojen klusterointia, on käyttäjän valittava klustereiden määrä. Kvantitatiivisena kriteerinä voi hyödyntää esimerkiksi siluetti-suureen maksimointia. Siluettisuureen saa näkyville Klusterit ja sijainnit välilehdelle klusterien määrää ilmaisevan kuvion alapuolelle klusteroinnin suorittamisen jälkeen. Tärkeämpää lienee kuitenkin tarkastella muodostuneita klustereita kvalitatiivisesta näkökulmasta ja analysoida kuinka järkeviä aluekokonaisuuksia niistä muodostuu.',style = {'textAlign':'center','font-family':'Arial', 'font-size':20}),
                                html.Br(),
                                html.H4('Klusterit ja sijainnit',style={'textAlign':'center'}),
                                html.Br(),
@@ -1672,6 +1692,7 @@ def serve_layout():
                   children= [
                             dcc.Store(id='data_store'),
                             dcc.Store(id='fin_store'),
+                            dcc.Store(id = 'centroid_store'),
 #                             dcc.Store(id = 'map_data_store'),
 #                             dcc.Store(id = 'map_layout_store'),
                             dcc.Download(id = "download-component")
@@ -1864,6 +1885,7 @@ def update_ev_indicator(pca, explained_variance):
 @app.callback(
     [ServersideOutput('data_store','data'), 
      ServersideOutput('fin_store','data'),
+     ServersideOutput('centroid_store','data')
 #      Output('map_data_store','data'),
 #      Output('map_layout_store','data')
     ],
@@ -1888,9 +1910,9 @@ def perform_clustering(n_clicks,area, n_clusters, features, pca, explained_varia
 #                }[pca]
         
         if pca:
-            data = cluster_data_with_PCA(n_clusters, data, features, explained_variance,random_state)
+            data, centroids = cluster_data_with_PCA(n_clusters, data, features, explained_variance,random_state)
         else:
-            data = cluster_data(n_clusters, data, features,random_state)
+            data, centroids = cluster_data(n_clusters, data, features,random_state)
        
         koko_maa = koko_maa_dict[area]
         
@@ -1903,7 +1925,7 @@ def perform_clustering(n_clicks,area, n_clusters, features, pca, explained_varia
 #         map_data = orjson.loads(to_json_plotly(map_figure))['data']
 #         map_layout = orjson.loads(to_json_plotly(map_figure))['layout']
 
-        return data, suomi#, map_data, map_layout 
+        return data, suomi, centroids#, map_data, map_layout 
 
         
         
@@ -2475,11 +2497,13 @@ def update_n_cluster_view(n_clusters):
 @app.callback(
     Output("download-component", "data"),
     [Input("download_button", "n_clicks"),
-    State('data_store','data')
+    State('data_store','data'),
+     State('centroid_store','data'),
+     State('fin_store','data')
     ]
     
 )
-def download(n_clicks, data):
+def download(n_clicks, data, centroids,suomi):
     
     if n_clicks > 0:
 
@@ -2509,6 +2533,9 @@ def download(n_clicks, data):
         metadata.columns = ['Tieto','Arvo']
         metadata = metadata.set_index('Tieto')
         
+        suomi.index.name = 'Avainluku'
+        suomi.columns = suomi.columns.str.replace('label', 'Lähde (Koko maan arvo (Tilastokeskus) / Laskettu '+aluejako.lower().replace('kunta','kuntien')+' keskiarvo)')
+        
         
         xlsx_io = io.BytesIO()
         writer = pd.ExcelWriter(xlsx_io, engine='xlsxwriter')
@@ -2518,6 +2545,8 @@ def download(n_clicks, data):
         data.to_excel(writer, sheet_name= 'Data klusteroituna')#city+'_'+datetime.now().strftime('%d_%m_%Y'))
 
         metadata.to_excel(writer, sheet_name = 'Klusteroinnin metadata')
+        centroids.to_excel(writer, sheet_name = 'Klustereiden keskukset')
+        suomi.to_excel(writer, sheet_name = 'Koko maan viitearvot')
         writer.save()
         
 
