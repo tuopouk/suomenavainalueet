@@ -749,7 +749,7 @@ def cluster_data(n_clusters, data, features, random_state):
     
     
     inertia = round(kmeans.inertia_,2)
-    silhouette = round(silhouette_score(X, preds),2)
+    silhouette = round(silhouette_score(X, preds,random_state=random_state,n_jobs=-1),2)
 
     data['cluster'] = clusters
     data['inertia'] = inertia
@@ -846,7 +846,7 @@ def cluster_data_with_PCA(n_clusters, data, features, explained_variance, random
 
     
     inertia = round(kmeans.inertia_,2)
-    silhouette = round(silhouette_score(X, preds),2)
+    silhouette = round(silhouette_score(X, preds,random_state=random_state,n_jobs=-1),2)
 
     data['cluster'] = clusters
     data['inertia'] = inertia
@@ -1574,6 +1574,12 @@ def serve_layout():
                                html.P('6. Valitse se osuus alkuperäisen datan variaatiosta, joka vähintään säilytetään PCA:ssa.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
                                html.P('7. Klusteroi klikkaamalla "Klusteroi" -painiketta.',style = {'text-align':'center', 'font-family':'Arial Black', 'font-size':20}),
                                html.Br(),
+                               html.H4('K-Means klusteroinnista', style = {'textAlign':'center'}),
+                               html.Br(),
+                               html.P('K-keskiarvojen (K-Means) klusteroinnilla voidaan hakea piileviä lainalaisuuksia moniulotteisista dataseteistä, jotka koostuvat numeerisisista ja jatkuvista muuttujista, kuten kuntien avainluvut tässä sovelluksessa. Nimensä mukaisesti algoritmi etsii moniulotteisesta datasta keskipisteet, jotka ovat jäsentensä keskiarvot. Klusterin jäsenyys määritellään euklidisen etäisyyden perusteella siten, että jokainen piste moniultteisessa data-avaruudessa kuuluu siihen klusteriin, jonka keskus on sitä lähin. Algoritmi alustaa ensin k kappaletta (k on käyttäjän valitsema klustereiden määrä) keskipisteitä data-avaruudessa satunnaisesti, minkä jälkeen kaikki datapisteet ryhmitetään lähimpiin keskipisteisiinsä. Klustereiden keskipisteet päivitetään laskemalla kaikkien niiden sisäisten jäsenien keskiarvo, minkä jälkeen taas ryhmitetään datapisteet lähimpiin klustereihinsa. Tätä prosessia jatketaan, kunnes muutosta ei tapahdu, eli klusterit konvergoituvat.', style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                               html.Div(style = {'text-align':'center'},
+                                        children = [html.A('Katso K-Means visualisointi Youtubessa.', href = 'https://www.youtube.com/embed/nXY6PxAaOk0', target="_blank",style = {'textAlign':'center','font-family':'Arial', 'font-size':20})]),
+                               html.Br(),
                                html.H4('Satunnaissiemenen asettaminen', style = {'textAlign':'center'}),
                                html.Br(),
                                html.P('Klusteroinnin satunnaissiemenen asettaminen on toimenpide, jolla varmistetaan klusteroinnin toistettavuus. Klustereiden alustaminen on stokastinen prosessi, jossa klustereiden keskusta (englanniksi centroid) muodostetaan ensin satunnaisesti, minkä jälkeen klusterit hakeutuvat iteratiivisesti optimaaliseen tilaan (klustereiden sisäiset alkiot mahdollisimman lähellä toisiaan, ja klusterit mahdollisimman kaukana toisistaan). Satunnaissiemenen (eng. random seed) asettaminen vaikuttaa siten klustereiden alustukseen ja sitä kautta myös lopputulokseen. Käyttäjän tulee kokeilemalla valita sopiva satunnaissiemen esimerkiksi tarkastelemalla siluettisuuretta tai arvioimalla klustereita kvalitatiivisesta näkökulmasta. Mikäli muut valinnat pysyvät samoina, samalla satunnaissiemenellä saa aina samat klusterit, jolloin klusterointi voidaan toistaa. Samaa satunnaissiementä hyödynnetään myös pääkomponenttianalyysissä. Käytetty satunnaissiemen tallentuu myös tulosexceliin.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
@@ -1606,7 +1612,7 @@ def serve_layout():
                                html.Br(),
                                html.H4('Klusterit kahden avainluvun mukaan',style={'textAlign':'center'}),
                                html.Br(),
-                               html.P('Klustereita voi tarkastella myös kahden avainluvun mukaan sille varatulla välilehdellä. Näin pystytään tarkastelemaan avainlukujen välisiä korrelaatioita klustereittain sekä profiloimaan klustereita paremmin.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                               html.P('Klustereita voi tarkastella myös kahden avainluvun mukaan sille varatulla välilehdellä. Näin pystytään tarkastelemaan avainlukujen välisiä korrelaatioita klustereittain sekä profiloimaan klustereita paremmin. Tällä välilehdellä voidaan tarkastella klustereita kahden avainluvun mukaan visualisoimalla niiden klusterikohtaiset keskiarvot sirontakuviolla.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
                                html.Br(),
                                html.H4('Avainluvut klustereissa',style={'textAlign':'center'}),
                                html.Br(),
