@@ -58,13 +58,13 @@ colors = pd.read_csv('colors_wikipedia.csv')
 colors.index+=1
 colors.index = colors.index.astype(int)
 
-url = 'https://pxnet2.stat.fi:443/PXWeb/api/v1/fi/Kuntien_avainluvut/2021/kuntien_avainluvut_2021_viimeisin.px'
+# url = 'https://pxnet2.stat.fi:443/PXWeb/api/v1/fi/Kuntien_avainluvut/2021/kuntien_avainluvut_2021_viimeisin.px'
+
+url = "https://pxdata.stat.fi:443/PxWeb/api/v1/fi/Kuntien_avainluvut/2021/kuntien_avainluvut_2021_viimeisin.px"
 
 # Kunta-kyselyn body
 
-kunta_payload = """
-
-{
+kunta_payload = {
   "query": [
     {
       "code": "Alue 2021",
@@ -389,11 +389,9 @@ kunta_payload = """
     "format": "json-stat2"
   }
 }
-"""
-# Maakunta-kyselyn body
-mk_payload = """
 
-{
+# Maakunta-kyselyn body
+mk_payload = {
   "query": [
     {
       "code": "Alue 2021",
@@ -428,12 +426,8 @@ mk_payload = """
     "format": "json-stat2"
   }
 }
-
-"""
 # Seutukunta-kyselyn body
-sk_payload = """
-
-{
+sk_payload = {
   "query": [
     {
       "code": "Alue 2021",
@@ -519,7 +513,6 @@ sk_payload = """
   }
 }
 
-"""
 
 area_selections = [{'label':'Maakunta', 'value': 'Maakunta'},
                    {'label':'Seutukunta', 'value': 'Seutukunta'},
@@ -652,13 +645,14 @@ server.secret_key = os.environ.get('secret_key','secret')
 app = Dash(name = __name__, 
            prevent_initial_callbacks = False, 
            server = server,
-           external_scripts = ["https://raw.githubusercontent.com/plotly/plotly.js/master/dist/plotly-locale-fi.js"],
+           external_scripts = ["https://raw.githubusercontent.com/plotly/plotly.js/master/dist/plotly-locale-fi.js",
+                               "https://cdn.plot.ly/plotly-locale-fi-latest.js"],
         #   meta_tags = [{'name':'viewport',
          #               'content':'width=device-width, initial_scale=1.0, maximum_scale=1.2, minimum_scale=0.5'}],
            external_stylesheets = external_stylesheets
           )
-app.scripts.config.serve_locally = False
-app.scripts.append_script({"external_url": "https://cdn.plot.ly/plotly-locale-fi-latest.js"})
+# app.scripts.config.serve_locally = False
+# app.scripts.append_script({"external_url": "https://cdn.plot.ly/plotly-locale-fi-latest.js"})
 app.title = 'Suomen avainalueet'
 
 
@@ -669,10 +663,14 @@ def get_data(aluetaso):
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
  'Content-Type': 'application/json'}
     
-    json = requests.post(url, data = queries[aluetaso], headers = headers).json()
+    json = requests.post(url, json = queries[aluetaso], headers = headers).json()
+
+
 
     cities = list(json['dimension']['Alue 2021']['category']['label'].values())
+    
     dimensions = list(json['dimension']['Tiedot']['category']['label'].values())
+
     values = json['value']
 
     cities_df = pd.DataFrame(cities, columns = ['Alue'])
@@ -1931,6 +1929,8 @@ def perform_clustering(n_clicks,area, n_clusters, features, pca, explained_varia
 #         map_data = orjson.loads(to_json_plotly(map_figure))['data']
 #         map_layout = orjson.loads(to_json_plotly(map_figure))['layout']
 
+        
+
         return data, suomi, centroids#, map_data, map_layout 
 
         
@@ -1969,6 +1969,7 @@ def update_distribution_div(data, suomi):
     if data is None:
         raise PreventUpdate
         
+    
     cluster_features = data.features.values[0].split(';')
             
     cluster_features = [c.strip() for c in cluster_features]
@@ -2406,6 +2407,8 @@ def plot_extra_feature_graph(data,suomi,extra_feature):
     [Input('data_store','data')]
 )
 def plot_count_graph(data):
+    
+    print(data)
     
     inertia = data.inertia.values[0]
     silhouette = data.silhouette.values[0]
