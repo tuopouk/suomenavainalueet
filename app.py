@@ -60,327 +60,327 @@ colors.index = colors.index.astype(int)
 
 # url = 'https://pxnet2.stat.fi:443/PXWeb/api/v1/fi/Kuntien_avainluvut/2021/kuntien_avainluvut_2021_viimeisin.px'
 
-url = "https://pxdata.stat.fi:443/PxWeb/api/v1/fi/Kuntien_avainluvut/2021/kuntien_avainluvut_2021_viimeisin.px"
+url = "https://pxdata.stat.fi:443/PxWeb/api/v1/fi/Kuntien_avainluvut/uusin/kuntien_avainluvut_viimeisin.px"
 
 # Kunta-kyselyn body
 
 kunta_payload = {
   "query": [
     {
-      "code": "Alue 2021",
+      "code": "Alue",
       "selection": {
-        "filter": "item",
+        "filter": "agg:_- Kunnat aakkosjärjestyksessä 2023.agg",
         "values": [
           "SSS",
-          "020",
-          "005",
-          "009",
-          "010",
-          "016",
-          "018",
-          "019",
-          "035",
-          "043",
-          "046",
-          "047",
-          "049",
-          "050",
-          "051",
-          "052",
-          "060",
-          "061",
-          "062",
-          "065",
-          "069",
-          "071",
-          "072",
-          "074",
-          "075",
-          "076",
-          "077",
-          "078",
-          "079",
-          "081",
-          "082",
-          "086",
-          "111",
-          "090",
-          "091",
-          "097",
-          "098",
-          "102",
-          "103",
-          "105",
-          "106",
-          "108",
-          "109",
-          "139",
-          "140",
-          "142",
-          "143",
-          "145",
-          "146",
-          "153",
-          "148",
-          "149",
-          "151",
-          "152",
-          "165",
-          "167",
-          "169",
-          "170",
-          "171",
-          "172",
-          "176",
-          "177",
-          "178",
-          "179",
-          "181",
-          "182",
-          "186",
-          "202",
-          "204",
-          "205",
-          "208",
-          "211",
-          "213",
-          "214",
-          "216",
-          "217",
-          "218",
-          "224",
-          "226",
-          "230",
-          "231",
-          "232",
-          "233",
-          "235",
-          "236",
-          "239",
-          "240",
-          "320",
-          "241",
-          "322",
-          "244",
-          "245",
-          "249",
-          "250",
-          "256",
-          "257",
-          "260",
-          "261",
-          "263",
-          "265",
-          "271",
-          "272",
-          "273",
-          "275",
-          "276",
-          "280",
-          "284",
-          "285",
-          "286",
-          "287",
-          "288",
-          "290",
-          "291",
-          "295",
-          "297",
-          "300",
-          "301",
-          "304",
-          "305",
-          "312",
-          "316",
-          "317",
-          "318",
-          "398",
-          "399",
-          "400",
-          "407",
-          "402",
-          "403",
-          "405",
-          "408",
-          "410",
-          "416",
-          "417",
-          "418",
-          "420",
-          "421",
-          "422",
-          "423",
-          "425",
-          "426",
-          "444",
-          "430",
-          "433",
-          "434",
-          "435",
-          "436",
-          "438",
-          "440",
-          "441",
-          "475",
-          "478",
-          "480",
-          "481",
-          "483",
-          "484",
-          "489",
-          "491",
-          "494",
-          "495",
-          "498",
-          "499",
-          "500",
-          "503",
-          "504",
-          "505",
-          "508",
-          "507",
-          "529",
-          "531",
-          "535",
-          "536",
-          "538",
-          "541",
-          "543",
-          "545",
-          "560",
-          "561",
-          "562",
-          "563",
-          "564",
-          "309",
-          "576",
-          "577",
-          "578",
-          "445",
-          "580",
-          "581",
-          "599",
-          "583",
-          "854",
-          "584",
-          "588",
-          "592",
-          "593",
-          "595",
-          "598",
-          "601",
-          "604",
-          "607",
-          "608",
-          "609",
-          "611",
-          "638",
-          "614",
-          "615",
-          "616",
-          "619",
-          "620",
-          "623",
-          "624",
-          "625",
-          "626",
-          "630",
-          "631",
-          "635",
-          "636",
-          "678",
-          "710",
-          "680",
-          "681",
-          "683",
-          "684",
-          "686",
-          "687",
-          "689",
-          "691",
-          "694",
-          "697",
-          "698",
-          "700",
-          "702",
-          "704",
-          "707",
-          "729",
-          "732",
-          "734",
-          "736",
-          "790",
-          "738",
-          "739",
-          "740",
-          "742",
-          "743",
-          "746",
-          "747",
-          "748",
-          "791",
-          "749",
-          "751",
-          "753",
-          "755",
-          "758",
-          "759",
-          "761",
-          "762",
-          "765",
-          "766",
-          "768",
-          "771",
-          "777",
-          "778",
-          "781",
-          "783",
-          "831",
-          "832",
-          "833",
-          "834",
-          "837",
-          "844",
-          "845",
-          "846",
-          "848",
-          "849",
-          "850",
-          "851",
-          "853",
-          "857",
-          "858",
-          "859",
-          "886",
-          "887",
-          "889",
-          "890",
-          "892",
-          "893",
-          "895",
-          "785",
-          "905",
-          "908",
-          "092",
-          "915",
-          "918",
-          "921",
-          "922",
-          "924",
-          "925",
-          "927",
-          "931",
-          "934",
-          "935",
-          "936",
-          "941",
-          "946",
-          "976",
-          "977",
-          "980",
-          "981",
-          "989",
-          "992"
+          "KU020",
+          "KU005",
+          "KU009",
+          "KU010",
+          "KU016",
+          "KU018",
+          "KU019",
+          "KU035",
+          "KU043",
+          "KU046",
+          "KU047",
+          "KU049",
+          "KU050",
+          "KU051",
+          "KU052",
+          "KU060",
+          "KU061",
+          "KU062",
+          "KU065",
+          "KU069",
+          "KU071",
+          "KU072",
+          "KU074",
+          "KU075",
+          "KU076",
+          "KU077",
+          "KU078",
+          "KU079",
+          "KU081",
+          "KU082",
+          "KU086",
+          "KU111",
+          "KU090",
+          "KU091",
+          "KU097",
+          "KU098",
+          "KU102",
+          "KU103",
+          "KU105",
+          "KU106",
+          "KU108",
+          "KU109",
+          "KU139",
+          "KU140",
+          "KU142",
+          "KU143",
+          "KU145",
+          "KU146",
+          "KU153",
+          "KU148",
+          "KU149",
+          "KU151",
+          "KU152",
+          "KU165",
+          "KU167",
+          "KU169",
+          "KU170",
+          "KU171",
+          "KU172",
+          "KU176",
+          "KU177",
+          "KU178",
+          "KU179",
+          "KU181",
+          "KU182",
+          "KU186",
+          "KU202",
+          "KU204",
+          "KU205",
+          "KU208",
+          "KU211",
+          "KU213",
+          "KU214",
+          "KU216",
+          "KU217",
+          "KU218",
+          "KU224",
+          "KU226",
+          "KU230",
+          "KU231",
+          "KU232",
+          "KU233",
+          "KU235",
+          "KU236",
+          "KU239",
+          "KU240",
+          "KU320",
+          "KU241",
+          "KU322",
+          "KU244",
+          "KU245",
+          "KU249",
+          "KU250",
+          "KU256",
+          "KU257",
+          "KU260",
+          "KU261",
+          "KU263",
+          "KU265",
+          "KU271",
+          "KU272",
+          "KU273",
+          "KU275",
+          "KU276",
+          "KU280",
+          "KU284",
+          "KU285",
+          "KU286",
+          "KU287",
+          "KU288",
+          "KU290",
+          "KU291",
+          "KU295",
+          "KU297",
+          "KU300",
+          "KU301",
+          "KU304",
+          "KU305",
+          "KU312",
+          "KU316",
+          "KU317",
+          "KU318",
+          "KU398",
+          "KU399",
+          "KU400",
+          "KU407",
+          "KU402",
+          "KU403",
+          "KU405",
+          "KU408",
+          "KU410",
+          "KU416",
+          "KU417",
+          "KU418",
+          "KU420",
+          "KU421",
+          "KU422",
+          "KU423",
+          "KU425",
+          "KU426",
+          "KU444",
+          "KU430",
+          "KU433",
+          "KU434",
+          "KU435",
+          "KU436",
+          "KU438",
+          "KU440",
+          "KU441",
+          "KU475",
+          "KU478",
+          "KU480",
+          "KU481",
+          "KU483",
+          "KU484",
+          "KU489",
+          "KU491",
+          "KU494",
+          "KU495",
+          "KU498",
+          "KU499",
+          "KU500",
+          "KU503",
+          "KU504",
+          "KU505",
+          "KU508",
+          "KU507",
+          "KU529",
+          "KU531",
+          "KU535",
+          "KU536",
+          "KU538",
+          "KU541",
+          "KU543",
+          "KU545",
+          "KU560",
+          "KU561",
+          "KU562",
+          "KU563",
+          "KU564",
+          "KU309",
+          "KU576",
+          "KU577",
+          "KU578",
+          "KU445",
+          "KU580",
+          "KU581",
+          "KU599",
+          "KU583",
+          "KU854",
+          "KU584",
+          "KU588",
+          "KU592",
+          "KU593",
+          "KU595",
+          "KU598",
+          "KU601",
+          "KU604",
+          "KU607",
+          "KU608",
+          "KU609",
+          "KU611",
+          "KU638",
+          "KU614",
+          "KU615",
+          "KU616",
+          "KU619",
+          "KU620",
+          "KU623",
+          "KU624",
+          "KU625",
+          "KU626",
+          "KU630",
+          "KU631",
+          "KU635",
+          "KU636",
+          "KU678",
+          "KU710",
+          "KU680",
+          "KU681",
+          "KU683",
+          "KU684",
+          "KU686",
+          "KU687",
+          "KU689",
+          "KU691",
+          "KU694",
+          "KU697",
+          "KU698",
+          "KU700",
+          "KU702",
+          "KU704",
+          "KU707",
+          "KU729",
+          "KU732",
+          "KU734",
+          "KU736",
+          "KU790",
+          "KU738",
+          "KU739",
+          "KU740",
+          "KU742",
+          "KU743",
+          "KU746",
+          "KU747",
+          "KU748",
+          "KU791",
+          "KU749",
+          "KU751",
+          "KU753",
+          "KU755",
+          "KU758",
+          "KU759",
+          "KU761",
+          "KU762",
+          "KU765",
+          "KU766",
+          "KU768",
+          "KU771",
+          "KU777",
+          "KU778",
+          "KU781",
+          "KU783",
+          "KU831",
+          "KU832",
+          "KU833",
+          "KU834",
+          "KU837",
+          "KU844",
+          "KU845",
+          "KU846",
+          "KU848",
+          "KU849",
+          "KU850",
+          "KU851",
+          "KU853",
+          "KU857",
+          "KU858",
+          "KU859",
+          "KU886",
+          "KU887",
+          "KU889",
+          "KU890",
+          "KU892",
+          "KU893",
+          "KU895",
+          "KU785",
+          "KU905",
+          "KU908",
+          "KU092",
+          "KU915",
+          "KU918",
+          "KU921",
+          "KU922",
+          "KU924",
+          "KU925",
+          "KU927",
+          "KU931",
+          "KU934",
+          "KU935",
+          "KU936",
+          "KU941",
+          "KU946",
+          "KU976",
+          "KU977",
+          "KU980",
+          "KU981",
+          "KU989",
+          "KU992"
         ]
       }
     }
@@ -394,11 +394,12 @@ kunta_payload = {
 mk_payload = {
   "query": [
     {
-      "code": "Alue 2021",
+      "code": "Alue",
       "selection": {
-        "filter": "item",
+        "filter": "agg:_- Maakunnat 2023.agg",
         "values": [
           "SSS",
+          "MA1",
           "MK01",
           "MK02",
           "MK04",
@@ -417,6 +418,7 @@ mk_payload = {
           "MK17",
           "MK18",
           "MK19",
+          "MA2",
           "MK21"
         ]
       }
@@ -430,11 +432,12 @@ mk_payload = {
 sk_payload = {
   "query": [
     {
-      "code": "Alue 2021",
+      "code": "Alue",
       "selection": {
-        "filter": "item",
+        "filter": "agg:_- Seutukunnat 2023.agg",
         "values": [
           "SSS",
+          "MA1",
           "SK011",
           "SK014",
           "SK015",
@@ -501,6 +504,7 @@ sk_payload = {
           "SK194",
           "SK196",
           "SK197",
+          "MA2",
           "SK211",
           "SK212",
           "SK213"
@@ -513,16 +517,59 @@ sk_payload = {
   }
 }
 
+hyv_payload = {
+  "query": [
+    {
+      "code": "Alue",
+      "selection": {
+        "filter": "agg:_- Hyvinvointialueet 2023.agg",
+        "values": [
+          "SSS",
+          "MA1",
+          "HVA01",
+          "HVA02",
+          "HVA03",
+          "HVA04",
+          "HVA05",
+          "HVA06",
+          "HVA07",
+          "HVA08",
+          "HVA09",
+          "HVA10",
+          "HVA11",
+          "HVA12",
+          "HVA13",
+          "HVA14",
+          "HVA15",
+          "HVA16",
+          "HVA17",
+          "HVA18",
+          "HVA19",
+          "HVA20",
+          "HVA21",
+          "HVA90",
+          "MA2",
+          "HVA91"
+        ]
+      }
+    }
+  ],
+  "response": {
+    "format": "json-stat2"
+  }
+}
 
 area_selections = [{'label':'Maakunta', 'value': 'Maakunta'},
                    {'label':'Seutukunta', 'value': 'Seutukunta'},
-                   {'label':'Kunta', 'value': 'Kunta'}]
+                   {'label':'Kunta', 'value': 'Kunta'},
+                   {'label':'Hyvinvointialue', 'value': 'Hyvinvointialue'}]
 
 feature_selections = [{'label':feature, 'value':feature} for feature in sorted(requests.get(url).json()['variables'][1]['valueTexts'])]
 
 queries = {'Maakunta':mk_payload,
            'Seutukunta':sk_payload,
-           'Kunta':kunta_payload}
+           'Kunta':kunta_payload,
+           'Hyvinvointialue':hyv_payload}
 
 # Alueiden nimiä on muunnettava, koska ne ovat erit kartta-aineistossa ja Avainluvut-rajapinnassa.
 
@@ -617,20 +664,26 @@ seutukunta_perusmuoto = {'Etelä-Pirkanmaan seutukunta': 'Etelä-Pirkanmaa',
                          'Ålands landsbygd': 'Ålands landsbygd',
                          'Ålands skärgård': 'Ålands skärgård'}
 
-# https://geo.stat.fi/geoserver/wfs?service=WFS&version=2.0.0&request=GetFeature&typeName=tilastointialueet:kunta1000k_2021&outputFormat=json
-with open('kunnat_tk_4326.json', encoding = 'ISO-8859-1') as f:
+# https://geo.stat.fi/geoserver/wfs?service=WFS&version=2.0.0&request=GetFeature&typeName=tilastointialueet:kunta1000k_2023&outputFormat=json
+with open('kunnat_tk_4326.json', encoding = 'utf-8') as f:
     kuntarajat = orjson.loads(f.read())
 
     
-# https://geo.stat.fi/geoserver/wfs?service=WFS&version=2.0.0&request=GetFeature&typeName=maakunta1000k_2021&outputFormat=json
-with open('maakunnat_tk_4326.json', encoding = 'ISO-8859-1') as f:
+# https://geo.stat.fi/geoserver/wfs?service=WFS&version=2.0.0&request=GetFeature&typeName=maakunta1000k_2023&outputFormat=json
+with open('maakunnat_tk_4326.json', encoding = 'utf-8') as f:
     maakuntarajat = orjson.loads(f.read())
+
     
-# https://geo.stat.fi/geoserver/wfs?service=WFS&version=2.0.0&request=GetFeature&typeName=tilastointialueet:seutukunta1000k_2021&outputFormat=json    
-with open('seutukunnat_tk_4326.json', encoding = 'ISO-8859-1') as f:
+    
+# https://geo.stat.fi/geoserver/wfs?service=WFS&version=2.0.0&request=GetFeature&typeName=tilastointialueet:seutukunta1000k_2023&outputFormat=json    
+with open('seutukunnat_tk_4326.json', encoding = 'utf-8') as f:
     seutukuntarajat = orjson.loads(f.read())
 
-geojson_map = {'Kunta':kuntarajat, 'Maakunta':maakuntarajat, 'Seutukunta': seutukuntarajat} 
+# https://geo.stat.fi/geoserver/wfs?service=WFS&version=2.0.0&request=GetFeature&typeName=tilastointialueet:hyvinvointialue1000k_2023&outputFormat=json    
+with open('hyvinvointialueet_tk_4326.json', encoding = 'utf-8') as f:
+    hyvaluerajat = orjson.loads(f.read())
+
+geojson_map = {'Kunta':kuntarajat, 'Maakunta':maakuntarajat, 'Seutukunta': seutukuntarajat, 'Hyvinvointialue':hyvaluerajat} 
 
 spinners = ['graph', 'cube', 'circle', 'dot' ,'default']
 
@@ -667,7 +720,7 @@ def get_data(aluetaso):
 
 
 
-    cities = list(json['dimension']['Alue 2021']['category']['label'].values())
+    cities = list(json['dimension']['Alue']['category']['label'].values())
     
     dimensions = list(json['dimension']['Tiedot']['category']['label'].values())
 
@@ -683,12 +736,29 @@ def get_data(aluetaso):
     data = pd.pivot_table(data, values = 'value', index = ['Alue'], columns = 'dimensions')
     koko_maa = data.loc['KOKO MAA']
     data = data.drop('KOKO MAA', axis=0)
+
     data['Aluejako'] = aluetaso
-    if aluetaso == 'Maakunta':
-        data.index = data.index.map(maakunta_perusmuoto)
-    elif aluetaso == 'Seutukunta':
-        data.index = data.index.map(seutukunta_perusmuoto)
     
+    if aluetaso != 'Kunta':
+        data.index = [' '.join(i.split()[1:]).strip() for i in data.index]
+        data = data.sort_index()
+    #     #data.index = data.index.map(maakunta_perusmuoto)
+    #     data.index = [i for i in data.index]
+    # elif aluetaso == 'Seutukunta':
+    #     data.index = [i for i in data.index]
+        #data.index = data.index.map(seutukunta_perusmuoto)
+    try:
+        data = data.drop('MANNER-SUOMI', axis=0)
+    except:
+        ''
+    try:
+
+        data = data.drop('AHVENANMAA', axis=0)
+    except:
+        ''
+    data.index.name='Alue'
+    data.columns = list(data.columns)
+    data=data.dropna(axis=1)
     return (koko_maa, data)
 
 
@@ -700,22 +770,30 @@ def get_area_counts():
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
  'Content-Type': 'application/json'}
     
-    kunta_seutu_url = 'https://data.stat.fi/api/classifications/v2/correspondenceTables/kunta_1_20210101%23seutukunta_1_20210101/maps?content=data&format=json&lang=fi&meta=min'
+    kunta_seutu_url = 'https://data.stat.fi/api/classifications/v2/correspondenceTables/kunta_1_20230101%23seutukunta_1_20230101/maps?content=data&format=json&lang=fi&meta=min'
 
     seutu_kunta = pd.DataFrame([{'Seutukunta':c['targetItem']['classificationItemNames'][0]['name'], 'Kunta':c['sourceItem']['classificationItemNames'][0]['name']} for c in requests.get(kunta_seutu_url, headers = headers).json()])
         
-    kunta_maa_url = 'https://data.stat.fi/api/classifications/v2/correspondenceTables/kunta_1_20210101%23maakunta_1_20210101/maps?content=data&format=json&lang=fi&meta=min'
+    kunta_maa_url = 'https://data.stat.fi/api/classifications/v2/correspondenceTables/kunta_1_20230101%23maakunta_1_20230101/maps?content=data&format=json&lang=fi&meta=min'
     maa_kunta = pd.DataFrame([{'Maakunta':c['targetItem']['classificationItemNames'][0]['name'], 'Kunta':c['sourceItem']['classificationItemNames'][0]['name']} for c in requests.get(kunta_maa_url, headers = headers).json()])
-    
-    aluejako = pd.merge(left = seutu_kunta, right = maa_kunta, how = 'inner', on = 'Kunta')
+   
+    kunta_hyv_url = "https://data.stat.fi/api/classifications/v2/correspondenceTables/kunta_1_20230101%23hyvinvointialue_1_20230101/maps?content=data&format=json&lang=fi&meta=min"
+    kunta_hyv  = pd.DataFrame([{'Hyvinvointialue':c['targetItem']['classificationItemNames'][0]['name'], 'Kunta':c['sourceItem']['classificationItemNames'][0]['name']} for c in requests.get(kunta_hyv_url, headers = headers).json()])
+
+    aluejako = pd.merge(left=pd.merge(left = seutu_kunta, right = maa_kunta, how = 'inner', on = 'Kunta'),
+                        right = kunta_hyv, how = 'inner', on = 'Kunta')
     aluejako.Kunta = aluejako.Kunta.str.replace('Maarianhamina - Mariehamn','Maarianhamina')
     maakunnassa_kuntia = aluejako.groupby('Maakunta').Kunta.count()
     seutukunnassa_kuntia = aluejako.groupby('Seutukunta').Kunta.count()
     kunnassa_kuntia = aluejako.groupby('Kunta').Kunta.count()
+    kunnassa_hyv = aluejako.groupby('Hyvinvointialue').Kunta.count()
     
+    
+
     return {'Kunta':kunnassa_kuntia,
             'Seutukunta':seutukunnassa_kuntia,
-            'Maakunta':maakunnassa_kuntia}
+            'Maakunta':maakunnassa_kuntia,
+            'Hyvinvointialue':kunnassa_hyv}
 
 kuntamäärät_alueittain = get_area_counts()
 
@@ -724,7 +802,9 @@ def cluster_data(n_clusters, data, features, random_state):
     
     scl = StandardScaler()  
 
-    x = data[features]
+    data = data.dropna(axis=1)
+    x = data[[c for c in features if c in data.columns]]
+    
 
     X = scl.fit_transform(x)
 
@@ -739,7 +819,7 @@ def cluster_data(n_clusters, data, features, random_state):
     ## Tässä koodi, jolla lasketaan klusterien keskukset.
     centroids = kmeans.cluster_centers_
     centroids = scl.inverse_transform(centroids)
-    centroid_df = pd.DataFrame(centroids,columns=features)
+    centroid_df = pd.DataFrame(centroids,columns=[c for c in features if c in data.columns])
     centroid_df['Klusteri'] = sorted(np.unique(clusters))
     centroid_df = centroid_df.set_index('Klusteri').T
     centroid_df.index.name = 'Avainluku / Klusterit'
@@ -803,8 +883,8 @@ def cluster_data_with_PCA(n_clusters, data, features, explained_variance, random
     
     scl = StandardScaler()
        
-
-    x = data[features]
+    data = data.dropna(axis=1)
+    x = data[[c for c in features if c in data.columns]]
 
     X = scl.fit_transform(x)
 
@@ -837,7 +917,7 @@ def cluster_data_with_PCA(n_clusters, data, features, explained_variance, random
     centroids = kmeans.cluster_centers_
     centroids = pca.inverse_transform(centroids)
     centroids = scl.inverse_transform(centroids)
-    centroid_df = pd.DataFrame(centroids,columns=features)
+    centroid_df = pd.DataFrame(centroids,columns=[c for c in features if c in data.columns])
     centroid_df['Klusteri'] = sorted(np.unique(clusters))
     centroid_df = centroid_df.set_index('Klusteri').T
     centroid_df.index.name = 'Avainluku / Klusterit'
@@ -921,6 +1001,8 @@ def plot_feature(suomi, data, single_feature):
     
     aluejako = data_.Aluejako.values[0]
     kuntamäärät = kuntamäärät_alueittain[aluejako]
+
+
     
     value_counts = pd.merge(left = data_, right = kuntamäärät, left_on = data_.index, right_on = kuntamäärät.index, how = 'inner').groupby('cluster').Kunta.sum()
     
@@ -954,7 +1036,7 @@ def plot_feature(suomi, data, single_feature):
                          name = clusters_dict[i], 
                          legendrank=int(i),
                          textposition = 'auto',
-                     hovertemplate = ('<b>Klusteri </b><b>'+str(i)+'</b>:'+'<br>'+single_feature+': '+'{:,}'.format(np.round(gd[i].values[0],2)).replace('.00','').replace(',',' ')+' '+unit+'<br>Klusterin koko: '+str(n_clusters.loc[str(i)])+' '+aluejako.lower().replace('ta','taa')+', '+str(value_counts[str(i)])+' kuntaa').replace(str(value_counts[str(i)])+' kuntaa'+', '+str(value_counts[str(i)])+' kuntaa',str(value_counts[str(i)])+' kuntaa').replace(' 1 kuntaa',' yksi kunta').replace(' 1 maakuntaa',' yksi maakunta').replace(' 1 seutukuntaa',' yksi seutukunta'),
+                     hovertemplate = ('<b>Klusteri </b><b>'+str(i)+'</b>:'+'<br>'+single_feature+': '+'{:,}'.format(np.round(gd[i].values[0],2)).replace('.00','').replace(',',' ')+' '+unit+'<br>Klusterin koko: '+str(n_clusters.loc[str(i)])+' '+aluejako.lower().replace('ta','taa').replace('alue','aluetta')+', '+str(value_counts[str(i)])+' kuntaa').replace(str(value_counts[str(i)])+' kuntaa'+', '+str(value_counts[str(i)])+' kuntaa',str(value_counts[str(i)])+' kuntaa').replace(' 1 kuntaa',' yksi kunta').replace(' 1 maakuntaa',' yksi maakunta').replace(' 1 seutukuntaa',' yksi seutukunta').replace(' 1 hyvinvointialuetta',' yksi hyvinvointialue'),
                          textfont = dict(family='Arial Black', size = 18),
                          text = '{:,}'.format(np.round(gd.T.loc[i],2).values[0]).replace('.00','').replace(',',' ')+' '+unit+'<br>(N = '+str(n_clusters.loc[str(i)])+')</br>',
                          marker = dict(color = cluster_colors.loc[i])) for i in sorted(clusters_dict.keys())]
@@ -1023,12 +1105,12 @@ def plot_counts(data):
                      name = c,
                      textposition = 'auto',
                      textfont_size=16,
-                     hovertemplate = ('<b>Klusteri </b><b>'+c+'</b>:'+'<br>Klusterin koko: '+str(cdf.loc[c].n_clusters)+' '+aluejako.lower().replace('ta','taa')+', '+str(value_counts[c])+' kuntaa').replace(str(value_counts[c])+' kuntaa'+', '+str(value_counts[c])+' kuntaa',str(value_counts[c])+' kuntaa').replace(' 1 kuntaa',' yksi kunta').replace(' 1 maakuntaa',' yksi maakunta').replace(' 1 seutukuntaa',' yksi seutukunta'),
+                     hovertemplate = ('<b>Klusteri </b><b>'+c+'</b>:'+'<br>Klusterin koko: '+str(cdf.loc[c].n_clusters)+' '+aluejako.lower().replace('ta','taa').replace('alue','aluetta')+', '+str(value_counts[c])+' kuntaa').replace(str(value_counts[c])+' kuntaa'+', '+str(value_counts[c])+' kuntaa',str(value_counts[c])+' kuntaa').replace(' 1 kuntaa',' yksi kunta').replace(' 1 maakuntaa',' yksi maakunta').replace(' 1 seutukuntaa',' yksi seutukunta').replace(' 1 hyvinvointialuetta',' yksi hyvinvointialue'),
                      text = 'N = '+str(cdf.loc[c].n_clusters),
                      marker = dict(color=cdf.loc[c].color)) for c in cdf.index]
 
     figure = go.Figure(data = traces,
-                      layout = go.Layout(title=dict(text='<b>Klusterit koottain</b><br>(N = '+aluejako.lower().replace('ta','tien')+' määrä klusterissa)',
+                      layout = go.Layout(title=dict(text='<b>Klusterit koon mukaan</b><br>(N = '+aluejako.lower().replace('ta','tien')+' määrä klusterissa)',
                                                     x=.5,
                                                     
                                                     font=dict(family='Arial', size=30)),
@@ -1114,7 +1196,7 @@ def plot_correlations(data, suomi, feature1, feature2):
                      textposition='top center',
                      name = c, 
                      mode = 'markers+text', 
-                     hovertemplate = ('<b>Klusteri </b><b>'+c+'</b>:'+'<br>'+feature1+': {:,}'.format(round(d.loc[c][feature1],2)).replace('.00','').replace(',',' ')+' '+suomi.loc[feature1].yksikkö+'<br>'+feature2+': {:,}'.format(round(d.loc[c][feature2],2)).replace('.00','').replace(',',' ')+' '+suomi.loc[feature2].yksikkö+'<br>Klusterin koko: '+(str(cdf.loc[c].n_clusters)+' '+aluejako.lower().replace('ta','taa')+', '+str(value_counts[c])+' kuntaa')).replace(str(value_counts[c])+' kuntaa'+', '+str(value_counts[c])+' kuntaa',str(value_counts[c])+' kuntaa').replace(' 1 kuntaa',' yksi kunta').replace(' 1 maakuntaa',' yksi maakunta').replace(' 1 seutukuntaa',' yksi seutukunta'),
+                     hovertemplate = ('<b>Klusteri </b><b>'+c+'</b>:'+'<br>'+feature1+': {:,}'.format(round(d.loc[c][feature1],2)).replace('.00','').replace(',',' ')+' '+suomi.loc[feature1].yksikkö+'<br>'+feature2+': {:,}'.format(round(d.loc[c][feature2],2)).replace('.00','').replace(',',' ')+' '+suomi.loc[feature2].yksikkö+'<br>Klusterin koko: '+(str(cdf.loc[c].n_clusters)+' '+aluejako.lower().replace('ta','taa').replace('alue','aluetta')+', '+str(value_counts[c])+' kuntaa')).replace(str(value_counts[c])+' kuntaa'+', '+str(value_counts[c])+' kuntaa',str(value_counts[c])+' kuntaa').replace(' 1 kuntaa',' yksi kunta').replace(' 1 maakuntaa',' yksi maakunta').replace(' 1 seutukuntaa',' yksi seutukunta').replace(' 1 hyvivnointialuetta',' yksi hyvinvointialue'),
                      marker_size = value_counts[c], 
                      marker = dict(sizemode='area',opacity=.8, sizeref=2*value_counts.max()/ max_size**2, line_width=2, color = data_[data_.cluster==c].color.values[0])) for c in d.index]
     
@@ -1288,17 +1370,21 @@ def draw_box_plots(df, feature, suomi):
 kunnat_koko_maa, kunnat_data = get_data('Kunta')
 maakunnat_koko_maa, maakunnat_data = get_data('Maakunta')
 seutukunnat_koko_maa, seutukunnat_data = get_data('Seutukunta')
+hyv_alueet_koko_maa, hyv_alueet_data = get_data('Hyvinvointialue')
 
 koko_maa_dict = {'Kunta':kunnat_koko_maa,
                 'Seutukunta':seutukunnat_koko_maa,
-                'Maakunta':maakunnat_koko_maa}
+                'Maakunta':maakunnat_koko_maa,
+                'Hyvinvointialue':hyv_alueet_koko_maa}
 data_dict = {'Kunta':kunnat_data,
                 'Seutukunta':seutukunnat_data,
-                'Maakunta':maakunnat_data}
+                'Maakunta':maakunnat_data,
+                'Hyvinvointialue':hyv_alueet_data}
 
 max_clusters = {'Kunta':len(kunnat_data),
                'Maakunta':len(maakunnat_data),
-               'Seutukunta':len(seutukunnat_data)}
+               'Seutukunta':len(seutukunnat_data),
+               'Hyvinvointialue':len(hyv_alueet_data)}
 
 initial_features = [f['label'] for f in feature_selections if 'yö' in f['label'] and 'määrä' not in f['label']]
 
@@ -1556,7 +1642,7 @@ def serve_layout():
                                html.Br(),
                                html.H4('Sovelluksen esittely',style={'textAlign':'center'}),
                                html.Br(),
-                               html.P('Tässä sovelluksessa voidaan jakaa Suomen kunnat, seutukunnat tai maakunnat tilastollisesti merkittäviin avainalueisiin itse valittujen kuntien avainlukujen mukaan. Kuntien avainluvut ovat Tilastokeskuksen ylläpitämä data-aineisto, joka sisältää alueita koskevia tunnuslukuja. Tämä sovellus pyrkiikin täydentämään Kuntien avainluvut -palvelua mahdollistamalla kuntien, seutukuntien tai maakuntien ryhmittelyn (eli klusteroinnin) käyttäjän tarpeen mukaisilla indikaattoreilla. Klusterointi ei perustu alueiden maantieteelliseen sijaintiin vain ainoastaan alueiden avainlukuihin. Klusteroinnilla pyritään abstrahoimaan dataa suurempiin kokonaisuuksiin, joita ihmisten on helpompi käsitellä ja hallita. Näin tehtäessä kokonaisuuden analysointi helpottuu, kun koko aineiston sijasta voidaan nyt analysoida jokainen syntynyt klusteri erikseen, ja muodostaa laajempi käsitys klustereiden analyyseistä. Lisäksi klusteroinnilla voidaan havainnoida muodostavatko saadut aluekokonaisuudet mielenkiintoisia ja kuhunkin asiayhteyteen sopivia alueprofiileja, joita voidaan hyödyntää analyysien koostamisessa. Klusteroinnilla on mahdollistaa löytää esimerkiksi kuntien välillä myös sellaisia yhtäläisyyksiä, joiden havainnointi olisi muuten hyvin vaikeaa. Klusterointi perustuu koneoppimiseen, jota sovelletaan muodostettaessa ryhmittelysääntöjä, joiden tekeminen manuaalisesti olisi (erityisesti usean muuttujan tapauksessa) hyvin vaikeaa. Tässä sovelluksessa pyritäänkin siis löytämään, koneoppimista hyödyntäen, uusia aluekokonaisuuksia tilastollisen datan avulla. Käytetty algoritmi pyrkii etsimään käyttäjän syöttämän lukumäärän (eli klustereiden määrä) verran keskipisteitä moniulotteisesta data-avaruudesta (tässä ulottuvuuksien määrä on sama kuin kuntien avainlukujen lukumäärä) ja ryhmittämään jokaisen alueen lähimpään keskipisteeseensä.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}), 
+                               html.P('Tässä sovelluksessa voidaan jakaa Suomen kunnat, seutukunnat, hyvinvointialueet tai maakunnat tilastollisesti merkittäviin avainalueisiin itse valittujen kuntien avainlukujen mukaan. Kuntien avainluvut ovat Tilastokeskuksen ylläpitämä data-aineisto, joka sisältää alueita koskevia tunnuslukuja. Tämä sovellus pyrkiikin täydentämään Kuntien avainluvut -palvelua mahdollistamalla kuntien, seutukuntien tai maakuntien ryhmittelyn (eli klusteroinnin) käyttäjän tarpeen mukaisilla indikaattoreilla. Klusterointi ei perustu alueiden maantieteelliseen sijaintiin vain ainoastaan alueiden avainlukuihin. Klusteroinnilla pyritään abstrahoimaan dataa suurempiin kokonaisuuksiin, joita ihmisten on helpompi käsitellä ja hallita. Näin tehtäessä kokonaisuuden analysointi helpottuu, kun koko aineiston sijasta voidaan nyt analysoida jokainen syntynyt klusteri erikseen, ja muodostaa laajempi käsitys klustereiden analyyseistä. Lisäksi klusteroinnilla voidaan havainnoida muodostavatko saadut aluekokonaisuudet mielenkiintoisia ja kuhunkin asiayhteyteen sopivia alueprofiileja, joita voidaan hyödyntää analyysien koostamisessa. Klusteroinnilla on mahdollistaa löytää esimerkiksi kuntien välillä myös sellaisia yhtäläisyyksiä, joiden havainnointi olisi muuten hyvin vaikeaa. Klusterointi perustuu koneoppimiseen, jota sovelletaan muodostettaessa ryhmittelysääntöjä, joiden tekeminen manuaalisesti olisi (erityisesti usean muuttujan tapauksessa) hyvin vaikeaa. Tässä sovelluksessa pyritäänkin siis löytämään, koneoppimista hyödyntäen, uusia aluekokonaisuuksia tilastollisen datan avulla. Käytetty algoritmi pyrkii etsimään käyttäjän syöttämän lukumäärän (eli klustereiden määrä) verran keskipisteitä moniulotteisesta data-avaruudesta (tässä ulottuvuuksien määrä on sama kuin kuntien avainlukujen lukumäärä) ja ryhmittämään jokaisen alueen lähimpään keskipisteeseensä.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}), 
                                html.Br(),
                                html.P('Käyttäjä voi valita avainlukujen ja aluetason lisäksi myös haluttujen klustereiden määrän. Klustereiden määrän valintaan ei ole oikeaa tai väärää vastausta. Haluttua määrää lieneekin hyvä tarkastella käyttäjän substanssin kautta. Jos on esimerkiksi tarkoitus perustaa tietty määrä aluekehitystyöryhmiä, on mahdollista valita klustereita tuo samainen määrä. Käyttäjä voi myös kokeilla eri lähtöarvoja klustereiden muodostamiseksi. Klusterointi perustuu tässä sovelluksessa ohjaamattomaan koneoppimiseen perustuvaan K-Means -klusterointiin, missä K on valittujen klustereiden määrä. K-keskiarvojen klusteroinnista on kirjoitettu lisää alla olevassa esittelyssä. Sivun alalaidasta löytyy myös linkki Wikipedia-artikkeliin K-Means -klusteroinnista.',style={'textAlign':'center','font-family':'Arial', 'font-size':20}),
                                html.Br(),
@@ -1672,7 +1758,7 @@ def serve_layout():
                                    html.Br(),
                                    html.A('Seuraa LinkedIn:ssä', href='https://www.linkedin.com/in/tuomaspoukkula/', target = '_blank',style = {'textAlign':'center','font-family':'Arial', 'font-size':20}),
                                    html.Br(),
-                                   html.A('tai Twitterissä.', href='https://twitter.com/TuomasPoukkula', target = '_blank',style = {'textAlign':'center','font-family':'Arial', 'font-size':20}),
+                                   html.A('tai X:ssä.', href='https://twitter.com/TuomasPoukkula', target = '_blank',style = {'textAlign':'center','font-family':'Arial', 'font-size':20}),
                                    html.Br(),
                                    html.Br(),
                                    html.Label(['Sovellus ', 
@@ -1705,7 +1791,15 @@ def serve_layout():
   
                
               ])
+# @app.callback(
+        
+#     Output('features', 'options'),
+#     [Input('area','value')]
 
+# )
+# def update_feature_options(area):
+
+#     return sorted(list(data_dict[area].columns))
 
 @app.callback(
 
@@ -1930,7 +2024,6 @@ def perform_clustering(n_clicks,area, n_clusters, features, pca, explained_varia
 #         map_layout = orjson.loads(to_json_plotly(map_figure))['layout']
 
         
-
         return data, suomi, centroids#, map_data, map_layout 
 
         
@@ -2191,7 +2284,7 @@ def update_inner_correlations(data):
 def update_correlation_plot(feature1, feature2, data,  suomi):
     
     if data is None:
-        print('is none')
+        
         raise PreventUpdate
 
    
@@ -2212,7 +2305,6 @@ def update_correlation_plot(feature1, feature2, data,  suomi):
 def update_inner_correlation_plot(feature1, feature2, cluster, data,  suomi):
     
     if data is None:
-        print('is none')
         raise PreventUpdate
 
     
@@ -2408,7 +2500,7 @@ def plot_extra_feature_graph(data,suomi,extra_feature):
 )
 def plot_count_graph(data):
     
-    print(data)
+   
     
     inertia = data.inertia.values[0]
     silhouette = data.silhouette.values[0]
@@ -2464,7 +2556,7 @@ def plot_cluster_map(n_clicks, data):
         
 
 
-        return html.Div(children =[html.H3('Klusterit {}'.format(area.lower()).replace('kunta','kunnittain'), style ={'textAlign': 'center','fontSize':40, 'family':'Arial Black'}),html.Br(),
+        return html.Div(children =[html.H3('Klusterit {}'.format(area.lower()).replace('kunta','kunnittain').replace('alue','alueittain'), style ={'textAlign': 'center','fontSize':40, 'family':'Arial Black'}),html.Br(),
                                    dcc.Graph(id = 'cluster_map', figure = cluster_map),
                                    html.P('Jos kartta ei näy, kokeile toisella selaimella.',
                                          style={'font-size':20,'font-family':'Arial'}),
