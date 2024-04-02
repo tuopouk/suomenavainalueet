@@ -688,8 +688,8 @@ geojson_map = {'Kunta':kuntarajat, 'Maakunta':maakuntarajat, 'Seutukunta': seutu
 spinners = ['graph', 'cube', 'circle', 'dot' ,'default']
 
 external_stylesheets = [dbc.themes.SUPERHERO,
-                        "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css",
-                        'https://codepen.io/chriddyp/pen/brPBPO.css'
+                     #   "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css",
+                    #    'https://codepen.io/chriddyp/pen/brPBPO.css'
                        ]
 
 
@@ -1387,7 +1387,7 @@ max_clusters = {'Kunta':len(kunnat_data),
                'Hyvinvointialue':len(hyv_alueet_data)}
 
 initial_features = [f['label'] for f in feature_selections if 'yö' in f['label'] and 'määrä' not in f['label']]
-
+initial_features = [f['label'] for f in feature_selections if '%' in f['label']]
 
 initial_n_clusters = 5
 
@@ -2041,7 +2041,7 @@ def update_count_and_map(n_clicks):
         return [
                     dbc.Col(
                             children=[
-                                html.Div(id = 'count_plot_div'),
+                                dcc.Loading(html.Div(id = 'count_plot_div'), type = random.choice(spinners)),
 
                             ],
                         xs =12, sm=12, md=12, lg=6, xl=6, align = 'center'),
